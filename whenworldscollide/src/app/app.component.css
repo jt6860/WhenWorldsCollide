@@ -2,7 +2,7 @@
     font-size: 2.5em;
     text-align: center;
     margin-top: 45px;
-    text-shadow: 2px 2px 5px #007FFF;
+    text-shadow: 2px 2px 5px #E3735E;
 }
 
 mat-toolbar {
@@ -10,7 +10,7 @@ mat-toolbar {
     justify-content: center;
     align-items: center;
     padding: 1rem;
-    background-color: #007FFF;
+    background-color: #E3735E;
     border-top: 1px black solid;
     border-bottom: 1px black solid;
 }
@@ -48,7 +48,7 @@ main {
     padding: 10px;
     border: 1px black solid;
     background-color: #C0C0C0;
-    box-shadow: 2px 2px #007FFF;
+    box-shadow: 2px 2px #E3735E;
 }
 
 footer {
@@ -57,7 +57,7 @@ footer {
     padding: 10px;
     border: 1px black solid;
     background-color: #C0C0C0;
-    box-shadow: 2px 2px #007FFF;
+    box-shadow: 2px 2px #E3735E;
 }
 
 /* Responsive behavior */
