@@ -1,5 +1,9 @@
-<h1 class="persistant-title">When Worlds Collide Pizza</h1>
+<!-- Header -->
+<header>
+  <h1 class="persistant-title">When Worlds Collide Pizza</h1>
+</header>
 
+<!-- Navigation -->
 <nav>
   <mat-toolbar>
     <button mat-icon-button (click)="toggleMenu()" aria-label="Toggle menu">
@@ -14,6 +18,8 @@
       </div>
     </div>
     <div *ngIf="showMenu" class="mobile-menu">
+    <!-- Menu Toolbar -->
+    <div class="links">
       <a routerLink="" routerLinkActive="active" ariaCurrentWhenActive="page">Home</a>
       <a routerLink="menu" routerLinkActive="active" ariaCurrentWhenActive="page">Our Menu</a>
       <a routerLink="order" routerLinkActive="active" ariaCurrentWhenActive="page">Place An Order</a>
@@ -22,10 +28,12 @@
   </mat-toolbar>
 </nav>
 
+<!-- Main Section with Router Outlet entry point into Home/Menu/Order/Contact components. -->
 <main>
   <router-outlet />
 </main>
 
+<!-- Footer -->
 <footer>
   Footer content!
 </footer>
