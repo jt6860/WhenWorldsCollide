@@ -97,6 +97,8 @@ footer {
         width: 100%;
         background-color: white;
         z-index: 10;
+        border-top: 1px black solid;
+        border-bottom: 1px black solid;
     }
 
     .mobile-menu a {
