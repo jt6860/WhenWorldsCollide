@@ -44,21 +44,6 @@ app.on('ready', () => {
     res.send('Hello from Express!');
   });
 
-  backendApp.get('/api/menu', (req, res) => {
-    const sqlite3 = require('sqlite3').verbose();
-    const db = new sqlite3.Database('./backend/whenworldscollide.db');
-
-    db.all('SELECT * FROM menuitems', (err, rows) => {
-      if (err) {
-        console.error("Error fetching menu items:", err);
-        res.status(500).json({ error: err.message });
-        return;
-      }
-
-      res.json(rows);
-    });
-  });
-
   // ... other API routes ...
 
   // Wait for the Angular dev server to start before starting Express

@@ -14,6 +14,25 @@ app.get('/', (req, res) => {
   res.send('Hello from Express!');
 });
 
+app.get('/api/menu', (req, res) => {
+  const sqlite3 = require('sqlite3').verbose();
+  const db = new sqlite3.Database('whenworldscollide.db');
+
+  if (db) {
+    console.log(db)
+  }
+  db.all('SELECT * FROM menuitems', (err, rows) => {
+    if (err) {
+      console.error("Error fetching menu items in main:", err);
+      res.status(500).json({ error: err.message });
+      return;
+    }
+
+    res.json(rows);
+  });
+});
+
+
 // waitOn for Angular dev server to start
 const waitOn = require('wait-on');
 waitOn({
