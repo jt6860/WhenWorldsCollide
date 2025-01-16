@@ -27,7 +27,7 @@ export class AdminComponent {
         .subscribe(
           () => {
             this.isLoggedIn = true;
-            this.router.navigate(['/admin/dashboard']); // Redirect to admin dashboard
+            this.router.navigate(['/admin']); // Redirect to admin dashboard
           },
           (error) => {
             // Handle login error

@@ -1,1 +1,8 @@
-<p>menu works!</p>
+<div class="menu-container">
+  <div *ngFor="let item of menuItems" class="menu-item">
+    <h3>{{ item.name }}</h3>
+    <p>{{ item.description }}</p>
+    <p class="category">{{ item.category }}</p>
+    <p class="price">${{ item.price }}</p>
+  </div>
+</div>

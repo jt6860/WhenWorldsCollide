@@ -5,12 +5,14 @@
   "description": "When Worlds Collide is a hypothetical Pizza Restaurant and the Group Capstone Project for CS492",
   "scripts": {
     "ng": "ng",
-    "start": "electron-forge start",
+    "start": "ng serve --proxy-config src/proxy.conf.json",
+    "efstart": "electron-forge start",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "package": "electron-forge package",
-    "make": "electron-forge make"
+    "make": "electron-forge make",
+    "postinstall": "electron-rebuild"
   },
   "private": true,
   "dependencies": {
@@ -24,9 +26,13 @@
     "@angular/platform-browser": "^19.0.0",
     "@angular/platform-browser-dynamic": "^19.0.0",
     "@angular/router": "^19.0.0",
+    "@electron/rebuild": "^3.7.1",
     "electron-squirrel-startup": "^1.0.1",
+    "express": "^4.21.2",
     "rxjs": "~7.8.0",
+    "sqlite3": "^5.1.7",
     "tslib": "^2.3.0",
+    "wait-on": "^8.0.2",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {

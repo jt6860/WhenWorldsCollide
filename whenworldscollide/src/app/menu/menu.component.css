@@ -1,0 +1,23 @@
+.menu-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+  }
+  
+  .menu-item {
+    width: 300px;
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .category {
+    font-style: italic;
+    color: #777;
+  }
+  
+  .price {
+    font-weight: bold;
+    margin-top: 10px;
+  }
