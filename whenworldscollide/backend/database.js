@@ -32,8 +32,7 @@ db.serialize(() => {
     price REAL
   )`);
 
-  // Insert menu items (this is a simplified example, 
-  // you'll need to format your menu data properly)
+  // Menu items
   const menuItems = [
     // Signature Pizzas
     { 
