@@ -26,7 +26,7 @@ db.serialize(() => {
   // Create the menuitems table
   db.run(`CREATE TABLE IF NOT EXISTS menuitems (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
+    name TEXT NOT NULL UNIQUE,
     description TEXT,
     category TEXT,
     price REAL
@@ -168,7 +168,7 @@ db.serialize(() => {
     }
   ];
 
-  const stmt2 = db.prepare('INSERT OR REPLACE INTO menuitems (name, description, category, price) VALUES (?, ?, ?, ?)');
+  const stmt2 = db.prepare('INSERT OR IGNORE INTO menuitems (name, description, category, price) VALUES (?, ?, ?, ?)');
   menuItems.forEach((item) => {
     stmt2.run(item.name, item.description, item.category, item.price);
   });
