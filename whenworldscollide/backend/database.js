@@ -1,7 +1,7 @@
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('whenworldscollide.db');
 
-db.serialize(() => {
+function initialCNI() {db.serialize(() => {
   // Create the admincredentials table
   db.run(`CREATE TABLE IF NOT EXISTS admincredentials (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -181,4 +181,6 @@ db.serialize(() => {
     orderitems TEXT NOT NULL, 
     totalprice REAL NOT NULL
   )`); 
-});
+});}
+
+module.exports = {db, initialCNI}

@@ -4,8 +4,10 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const url = require('url');
 const express = require('express');
+const cors = require('cors');
 const backendApp = express(); 
 const port = 3000; 
+const dbFunctions = require('./backend/database');
 
 // Keep a global reference of the window object
 let win;
@@ -37,7 +39,8 @@ app.on('ready', () => {
   const port = 3000;
 
   backendApp.use(express.json());
-  require('./backend/database');
+  backendApp.use(cors())
+  dbFunctions.initialCNI();
 
   // API routes
   backendApp.get('/', (req, res) => {

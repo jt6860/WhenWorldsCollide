@@ -1,13 +1,16 @@
 // server.js
 
 const express = require('express');
+const cors = require('cors');
 const app = express();
 const port = 3000; // Choose your desired port
+const dbFunctions = require('./database');
 
-// Middleware to parse JSON request bodies
+// Middleware to parse JSON request bodies and CORS
 app.use(express.json()); 
+app.use(cors());
 
-require('./database'); // This will run the code in database.js
+dbFunctions.initialCNI();
 
 // API routes (you'll add more routes here)
 app.get('/', (req, res) => {
