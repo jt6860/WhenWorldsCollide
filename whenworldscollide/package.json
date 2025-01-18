@@ -15,8 +15,8 @@
     "postinstall": "electron-rebuild"
   },
   "permissions": [
-  "sqlite"
-],
+    "sqlite"
+  ],
   "private": true,
   "dependencies": {
     "@angular/animations": "^19.0.0",

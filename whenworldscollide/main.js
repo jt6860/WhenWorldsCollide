@@ -77,5 +77,3 @@ app.on('activate', () => {
     createWindow();
   }
 });
-
-// ... other IPC handlers (if needed) ...

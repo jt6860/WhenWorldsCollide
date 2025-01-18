@@ -24,7 +24,7 @@ export class MenuComponent implements OnInit {
   constructor(private http: HttpClient) { }
 
   ngOnInit() {
-    this.http.get<MenuItem[]>('/api/menu')
+    this.http.get<MenuItem[]>('http://127.0.0.1:3000/api/menu')
       .subscribe({
         next: (data) => { 
           this.menuItems = data;
