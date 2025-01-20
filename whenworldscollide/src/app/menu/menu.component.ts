@@ -1,6 +1,5 @@
 import { Component, OnInit, Provider } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { AppModule } from '../module/app.module';
 import { CommonModule } from '@angular/common';
 
 interface MenuItem {
@@ -15,7 +14,6 @@ interface MenuItem {
   selector: 'app-menu',
   templateUrl: './menu.component.html',
   styleUrls: ['./menu.component.css'],
-  providers: [AppModule],
   imports: [CommonModule]
 })
 export class MenuComponent implements OnInit {

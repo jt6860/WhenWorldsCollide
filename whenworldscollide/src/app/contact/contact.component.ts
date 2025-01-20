@@ -1,25 +1,23 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms'; // Import ReactiveFormsModule
+import { HttpClient, HttpClientModule } from '@angular/common/http'; // Import HttpClientModule
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-contact',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './contact.component.html', // Correct path
-  styleUrls: ['./contact.component.css'], // Ensure the CSS file exists
+  imports: [CommonModule, ReactiveFormsModule, HttpClientModule], // Import ReactiveFormsModule and HttpClientModule here!
+  templateUrl: './contact.component.html',
+  styleUrls: ['./contact.component.css']
 })
 export class ContactComponent {
-  contactForm: FormGroup;
+  contactForm!: FormGroup;
   responseMessage: string = '';
 
   constructor(private fb: FormBuilder, private http: HttpClient) {
     this.contactForm = this.fb.group({
-      name: [''],
-      email: [''],
-      message: [''],
+      name: ['', Validators.required], // Add validators
+      email: ['', [Validators.required, Validators.email]],
+      message: ['', Validators.required]
     });
   }
 
@@ -33,8 +31,7 @@ export class ContactComponent {
         },
         error: (error) => {
           console.error('Error submitting the form:', error);
-          this.responseMessage =
-            'There was an error sending your message. Please try again later.';
+          this.responseMessage = 'There was an error sending your message. Please try again later.';
         },
       });
     } else {
