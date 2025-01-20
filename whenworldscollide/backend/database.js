@@ -32,6 +32,14 @@ function initialCNI() {db.serialize(() => {
     price REAL
   )`);
 
+  // Create the contacts table if it doesn't exist
+  db.run(`CREATE TABLE IF NOT EXISTS contacts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  message TEXT NOT NULL
+)`);
+
   // Menu items
   const menuItems = [
     // Signature Pizzas
