@@ -12,6 +12,7 @@ interface MenuItem {
 
 @Component({
   selector: 'app-menu',
+  standalone: true,
   templateUrl: './menu.component.html',
   styleUrls: ['./menu.component.css'],
   imports: [CommonModule]

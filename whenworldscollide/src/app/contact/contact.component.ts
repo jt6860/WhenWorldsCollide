@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-contact',
+  standalone: true,
   imports: [CommonModule, ReactiveFormsModule, HttpClientModule], // Import ReactiveFormsModule and HttpClientModule here!
   templateUrl: './contact.component.html',
   styleUrls: ['./contact.component.css']
