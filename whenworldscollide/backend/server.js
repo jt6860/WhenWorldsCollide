@@ -68,24 +68,24 @@ appExpress.post('/api/login', (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
-      return res.status(400).json({ message: 'Username and password are required.' });
+    return res.status(400).json({ message: 'Username and password are required.' });
   }
 
   const query = 'SELECT * FROM admincredentials WHERE username = ? AND password = ?'; // Compare username and password directly
 
   db.get(query, [username, password], (err, row) => {
-      if (err) {
-          console.error('Database query error:', err);
-          return res.status(500).json({ message: 'Login error.' });
-      }
+    if (err) {
+      console.error('Database query error:', err);
+      return res.status(500).json({ message: 'Login error.' });
+    }
 
-      if (row) {
-          console.log("Login successful!");
-          return res.status(200).json({ message: 'Login successful.' });
-      } else {
-          console.log("Invalid credentials");
-          return res.status(401).json({ message: 'Invalid username or password.' });
-      }
+    if (row) {
+      console.log("Login successful!");
+      res.status(200).json({ message: 'Login successful.', username: row.username });
+    } else {
+      console.log("Invalid credentials");
+      return res.status(401).json({ message: 'Invalid username or password.' });
+    }
   });
 });
 

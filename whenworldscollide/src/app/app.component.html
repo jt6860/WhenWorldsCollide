@@ -1,6 +1,11 @@
 <!-- Header -->
 <header>
   <h1 class="persistant-title">When Worlds Collide Pizza</h1>
+  <ng-container *ngIf="isLoggedIn">
+    <div class="user-info">
+        <span>Welcome, {{ currentUsername }}!</span>
+    </div>
+</ng-container>
 </header>
 
 <!-- Navigation -->
