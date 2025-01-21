@@ -27,7 +27,7 @@ export class AuthService {
     return this.http.post<AuthResponseData>(`${this.apiUrl}/login`, authData).pipe(
       tap(responseData => {
         this.setLoginStatus(true);
-        this.setCurrentUser(responseData.username || null); // Store username
+        this.setCurrentUser(responseData.username || null);
       }),
       catchError(this.handleError)
     );
@@ -40,32 +40,32 @@ export class AuthService {
 
   private setLoginStatus(status: boolean) {
     this.isLoggedInSubject.next(status);
-    localStorage.setItem('isLoggedIn', JSON.stringify(status));
+    sessionStorage.setItem('isLoggedIn', JSON.stringify(status));
   }
 
   private getStoredLoginStatus(): boolean {
     try {
-      const storedLogin = localStorage.getItem('isLoggedIn');
+      const storedLogin = sessionStorage.getItem('isLoggedIn');
       return storedLogin ? JSON.parse(storedLogin) : false;
     } catch (error) {
       console.error("Error parsing stored login status:", error);
-      localStorage.removeItem('isLoggedIn');
+      sessionStorage.removeItem('isLoggedIn');
       return false;
     }
   }
 
   private setCurrentUser(username: string | null) {
-      this.currentUserSubject.next(username);
-      localStorage.setItem('currentUser', JSON.stringify(username));
+    this.currentUserSubject.next(username);
+    sessionStorage.setItem('currentUser', JSON.stringify(username));
   }
 
   private getStoredUser(): string | null {
     try {
-      const storedUser = localStorage.getItem('currentUser');
+      const storedUser = sessionStorage.getItem('currentUser');
       return storedUser ? JSON.parse(storedUser) : null;
     } catch (error) {
       console.error("Error parsing stored user:", error);
-      localStorage.removeItem('currentUser');
+      sessionStorage.removeItem('currentUser');
       return null;
     }
   }

@@ -56,7 +56,7 @@ export class AdminComponent implements OnInit, OnDestroy {
         next: () => {
           this.errorMessage = ''; //Clear error message on successful login
         },
-        error: (error) => {
+        error: (error: { message: string; }) => {
           this.errorMessage = error.message;
           console.error('Login error:', error);
         }
