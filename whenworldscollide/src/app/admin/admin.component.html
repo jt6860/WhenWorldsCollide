@@ -1,23 +1,34 @@
-<div *ngIf="!isLoggedIn">
-    <button (click)="onToggleMode()">
-        {{ isLoginMode ? 'Register' : 'Login' }}
-    </button>
-
-    <form (ngSubmit)="onSubmit(f)" #f="ngForm">
-        <div *ngIf="isLoginMode">
-            <input type="text" name="username" ngModel placeholder="Username" required>
-            <input type="password" name="password" ngModel placeholder="Password" required>
+<div class="admin-container">
+    <div *ngIf="!isLoggedIn; else adminPanel">
+      <h2>{{ isLoginMode ? 'Admin Login' : 'Admin Registration' }}</h2>
+      <form (ngSubmit)="onSubmit(f)" #f="ngForm">
+        <div class="form-group">
+          <label for="username">Username:</label>
+          <input type="text" id="username" name="username" [(ngModel)]="username" required>
         </div>
-        <div *ngIf="!isLoginMode">
+        <div class="form-group">
+          <label for="password">Password:</label>
+          <input type="password" id="password" name="password" [(ngModel)]="password" required>
         </div>
-        <button type="submit">Submit</button>
-    </form>
-</div>
-
-<div *ngIf="isLoggedIn">
-    <h2>Welcome To The Admin Panel</h2>
-    <section>
-        This is where the menu editing window would populate
-    </section>
-    <button (click)="onLogout()">Logout</button>
-</div>
+        <div *ngIf="!isLoginMode" class="form-group">
+          <label for="confirmPassword">Confirm Password:</label>
+          <input type="password" id="confirmPassword" name="confirmPassword" ngModel required>
+        </div>
+        <button type="submit">{{ isLoginMode ? 'Login' : 'Register' }}</button>
+        <button type="button" (click)="onToggleMode()">
+          Switch to {{ isLoginMode ? 'Register' : 'Login' }}
+        </button>
+      </form>
+      <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+    </div>
+  
+    <ng-template #adminPanel>
+      <div class="admin-panel">
+        <h2>Welcome To The Admin Panel</h2>
+        <section>
+          <p>Menu Editing Area (To Be Implemented)</p>
+        </section>
+        <button (click)="onLogout()">Logout</button>
+      </div>
+    </ng-template>
+  </div>

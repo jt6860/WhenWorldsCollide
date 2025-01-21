@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
-import { AuthService } from '../auth.service'; // Your authentication service
+import { AuthService } from '../auth.service';
 import { Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -13,35 +13,51 @@ import { CommonModule } from '@angular/common';
 })
 export class AdminComponent {
   isLoggedIn = false;
-  isLoginMode = true; // Start in login mode
+  isLoginMode = true;
+  errorMessage: string = '';
+  username = '';
+  password = '';
 
-  constructor(private authService: AuthService, private router: Router, private commonModule: CommonModule) {}
+  constructor(private authService: AuthService, private router: Router) { }
 
   onToggleMode() {
     this.isLoginMode = !this.isLoginMode;
+    this.errorMessage = '';
   }
 
-  onSubmit(form: any) {
-    if (this.isLoginMode) {
-      // Handle login logic
-      this.authService.login(form.value.username, form.value.password)
-        .subscribe(
-          () => {
-            this.isLoggedIn = true;
-            this.router.navigate(['/admin']); // Redirect to admin dashboard
-          },
-          (error) => {
-            // Handle login error
-          }
-        );
-    } else {
-      // Handle registration logic (if applicable)
+  onSubmit(form: NgForm) {
+    if (!form.valid) {
+      return;
     }
+
+    if (this.isLoginMode) {
+      const authData = {
+        username: this.username,
+        password: this.password
+      };
+
+      this.authService.login(authData).subscribe({ // Call login with authData object
+        next: () => {
+          this.isLoggedIn = true;
+          this.router.navigate(['/admin']);
+        },
+        error: (error) => {
+          this.errorMessage = 'Invalid username or password.';
+          console.error('Login error:', error);
+        }
+      });
+    } else {
+      // Registration logic (if needed)
+    }
+    form.resetForm();
+    this.username = '';
+    this.password = '';
   }
 
   onLogout() {
     this.authService.logout();
     this.isLoggedIn = false;
-    this.isLoginMode = true; // Switch back to login mode
+    this.isLoginMode = true;
+    this.errorMessage = '';
   }
 }
