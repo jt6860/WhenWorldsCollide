@@ -4,14 +4,13 @@ const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 module.exports = {
   packagerConfig: {
     asar: true,
+    extraResources: ['./whenworldscollide.db'],
   },
   rebuildConfig: {},
   makers: [
     {
       name: '@electron-forge/maker-squirrel',
-      config: {
-        "name": "whenworldscollide"
-      },
+      config: {},
     },
     {
       name: '@electron-forge/maker-zip',

@@ -12,6 +12,7 @@
     "test": "ng test",
     "package": "electron-forge package",
     "make": "electron-forge make",
+    "make-zip-direct": "node build-zip.js",
     "postinstall": "electron-rebuild"
   },
   "permissions": [
@@ -30,9 +31,12 @@
     "@angular/platform-browser-dynamic": "^19.0.0",
     "@angular/router": "^19.0.0",
     "@electron/rebuild": "^3.7.1",
+    "asar": "^3.2.0",
     "cors": "^2.8.5",
     "electron-squirrel-startup": "^1.0.1",
     "express": "^4.21.2",
+    "node-process-manager": "^0.0.4",
+    "proper-lockfile": "^4.1.2",
     "rxjs": "~7.8.0",
     "sqlite3": "^5.1.7",
     "tslib": "^2.3.0",
@@ -54,6 +58,7 @@
     "@eslint/js": "^9.18.0",
     "@types/jasmine": "~5.1.0",
     "electron": "^34.0.0",
+    "electron-packager": "^17.1.2",
     "eslint": "^9.18.0",
     "globals": "^15.14.0",
     "jasmine-core": "~5.4.0",
@@ -63,6 +68,29 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "typescript": "~5.6.2"
+  },
+  "config": {
+    "forge_version": "7.6.0",
+    "packagerConfig": {
+      "asar": true,
+      "extraResources": [
+        {
+          "from": "backend",
+          "to": "backend"
+        }
+      ]
+    },
+    "makers": [
+      {
+        "name": "@electron-forge/maker-zip",
+        "platforms": [
+          "win32",
+          "darwin",
+          "linux"
+        ]
+      }
+    ],
+    "publishers": []
   },
   "main": "main.js"
 }

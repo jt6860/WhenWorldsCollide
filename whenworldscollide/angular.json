@@ -47,7 +47,7 @@
                 }
               ],
               "outputHashing": "all",
-              "baseHref": "./" // Add this line for Electron compatibility
+              "baseHref": "./"
             },
             "development": {
               "optimization": false,
