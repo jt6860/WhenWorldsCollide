@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { EditMenuItemDialogComponent } from '../edit-menu-item-dialog/edit-menu-item-dialog.component';
 import { CommonModule } from '@angular/common';
+import { MenuService } from '../menu.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-menu-editing',
@@ -11,23 +12,29 @@ import { CommonModule } from '@angular/common';
   templateUrl: './menu-editing.component.html',
   styleUrl: './menu-editing.component.css'
 })
-export class MenuEditingComponent implements OnInit {
+export class MenuEditingComponent implements OnInit, OnDestroy {
   menuItems: any[] = [];
+  private menuItemsSubscription: Subscription = new Subscription();
 
-  constructor(private http: HttpClient, private dialog: MatDialog) { }
+  constructor(
+    private dialog: MatDialog,
+    private menuService: MenuService
+  ) { }
 
-  ngOnInit() { this.fetchMenuItems(); }
+  ngOnInit() {
+    this.menuItemsSubscription = this.menuService.menuItems$.subscribe(
+      items => this.menuItems = items
+    );
+  }
 
-  fetchMenuItems() {
-    this.http.get<any[]>('http://localhost:3000/api/menu').subscribe(data => {
-      this.menuItems = data;
-    });
+  ngOnDestroy() {
+    this.menuItemsSubscription.unsubscribe();
   }
 
   openEditMenuItemDialog(menuItem: any) {
     const dialogRef = this.dialog.open(EditMenuItemDialogComponent, {
       width: '600px',
-      data: { ...menuItem } // Important: Create a copy
+      data: { ...menuItem }
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -38,9 +45,14 @@ export class MenuEditingComponent implements OnInit {
   }
 
   updateMenuItem(menuItem: any) {
-    this.http.put<any>(`http://localhost:3000/api/menu/${menuItem.id}`, menuItem)
-      .subscribe(() => {
-        this.fetchMenuItems(); // Refresh after update
-      });
+    this.menuService.updateMenuItem(menuItem).subscribe({
+      next: () => {
+        console.log('Updated menu item successfully');
+      },
+      error: (error) => {
+        // Error handling
+        console.error('Error updating menu item:', error);
+      }
+    });
   }
 }

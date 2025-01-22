@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { MenuService } from '../menu.service'; // Update with correct path
+import { Subscription } from 'rxjs';
 
 interface MenuItem {
   id: number;
@@ -23,30 +25,25 @@ interface OrderItem {
   templateUrl: './order.component.html',
   styleUrls: ['./order.component.css']
 })
-export class OrderComponent implements OnInit {
+export class OrderComponent implements OnInit, OnDestroy {
   menuItems: MenuItem[] = [];
   orderItems: OrderItem[] = [];
   customerName: string = '';
   orderTotal: number = 0;
   confirmationMessage: string = '';
   errorMessage: string = '';
+  private menuItemsSubscription: Subscription = new Subscription();
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private menuService: MenuService) { }
 
   ngOnInit(): void {
-    this.fetchMenuItems();
+    this.menuItemsSubscription = this.menuService.menuItems$.subscribe(
+      data => this.menuItems = data
+    );
   }
 
-  fetchMenuItems(): void {
-    this.http.get<MenuItem[]>('http://localhost:3000/api/menu')
-      .subscribe({
-        next: (data) => {
-          this.menuItems = data;
-        },
-        error: (error) => {
-          console.error('Error fetching menu items:', error);
-        }
-      });
+  ngOnDestroy(): void {
+    this.menuItemsSubscription.unsubscribe();
   }
 
   addToOrder(menuItem: MenuItem): void {
@@ -71,7 +68,6 @@ export class OrderComponent implements OnInit {
     if (newQuantity > 0) {
       orderItem.quantity = newQuantity;
     } else {
-      // Remove item if quantity is set to 0 or less
       this.removeFromOrder(orderItem);
     }
     this.calculateOrderTotal();
@@ -86,10 +82,12 @@ export class OrderComponent implements OnInit {
   submitOrder(): void {
     this.errorMessage = '';
     this.confirmationMessage = '';
+
     if (this.orderItems.length === 0) {
       this.errorMessage = 'Please add items to your order.';
       return;
     }
+
     if (!this.customerName) {
       this.errorMessage = 'Please enter your name.';
       return;

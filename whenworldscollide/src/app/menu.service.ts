@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { Observable, BehaviorSubject, throwError } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
 
 interface MenuItem {
   id: number;
@@ -36,5 +36,22 @@ export class MenuService {
 
   getMenuItemById(id: number): MenuItem | undefined {
     return this.menuItemsSubject.value.find(item => item.id === id);
+  }
+
+  updateMenuItem(menuItem: MenuItem): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/${menuItem.id}`, menuItem).pipe(
+      tap(() => {
+        // Update the menuItemsSubject with the updated item
+        const updatedMenuItems = this.menuItemsSubject.value.map(item =>
+          item.id === menuItem.id ? menuItem : item
+        );
+        this.menuItemsSubject.next(updatedMenuItems);
+      }),
+      catchError((error) => {
+        console.error('Error updating menu item:', error);
+        // You can do more sophisticated error handling here, like showing a user-friendly message.
+        return throwError(() => new Error('Failed to update menu item.')); // Re-throw the error to be handled by the component
+      })
+    );
   }
 }

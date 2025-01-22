@@ -1,6 +1,7 @@
-import { Component, OnInit, Provider } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MenuService } from '../menu.service'; // Update with correct path
+import { Subscription } from 'rxjs';
 
 interface MenuItem {
   id: number;
@@ -17,22 +18,19 @@ interface MenuItem {
   styleUrls: ['./menu.component.css'],
   imports: [CommonModule]
 })
-export class MenuComponent implements OnInit {
+export class MenuComponent implements OnInit, OnDestroy {
   menuItems: MenuItem[] = [];
+  private menuItemsSubscription: Subscription = new Subscription();
 
-  constructor(private http: HttpClient) { }
+  constructor(private menuService: MenuService) { }
 
   ngOnInit() {
-    this.http.get<MenuItem[]>('http://127.0.0.1:3000/api/menu')
-      .subscribe({
-        next: (data) => { 
-          this.menuItems = data;
-          console.log(data);
-        },
-        error: (error) => {
-          console.error('Error fetching menu:', error);
-          // Handle the error
-        }
-      });
+    this.menuItemsSubscription = this.menuService.menuItems$.subscribe(
+      data => this.menuItems = data
+    );
+  }
+
+  ngOnDestroy() {
+    this.menuItemsSubscription.unsubscribe();
   }
 }
