@@ -1,0 +1,21 @@
+<h2>Contact Submissions</h2>
+<table *ngIf="submissions.length > 0">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Message</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let submission of submissions">
+      <td>{{ submission.id }}</td>
+      <td>{{ submission.name }}</td>
+      <td>{{ submission.email }}</td>
+      <td>{{ submission.message }}</td>
+    </tr>
+  </tbody>
+</table>
+
+<p *ngIf="submissions.length === 0">No contact submissions yet.</p>

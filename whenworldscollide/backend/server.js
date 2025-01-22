@@ -27,7 +27,6 @@ db.serialize(() => {
 });
 
 // GETS
-
 appExpress.get('/', (req, res) => {
   res.send('Hello from Express!');
 });
@@ -38,6 +37,16 @@ appExpress.get('/api/menu', (req, res) => {
       console.error('Error fetching menu items:', err);
       res.status(500).json({ error: err.message });
       return;
+    }
+    res.json(rows);
+  });
+});
+
+appExpress.get('/api/contact', (req, res) => {
+  db.all('SELECT * FROM contacts', (err, rows) => {
+    if (err) {
+      console.error('Error fetching contact submissions:', err);
+      return res.status(500).json({ error: err.message });
     }
     res.json(rows);
   });
@@ -86,6 +95,21 @@ appExpress.post('/api/login', (req, res) => {
       console.log("Invalid credentials");
       return res.status(401).json({ message: 'Invalid username or password.' });
     }
+  });
+});
+
+// PUTS
+appExpress.put('/api/menu/:id', (req, res) => {
+  const id = req.params.id;
+  const { name, description, category, price } = req.body;
+
+  const query = 'UPDATE menuitems SET name = ?, description = ?, category = ?, price = ? WHERE id = ?';
+  db.run(query, [name, description, category, price, id], (err) => {
+    if (err) {
+      console.error('Error updating menu item:', err);
+      return res.status(500).json({ error: err.message });
+    }
+    res.json({ message: 'Menu item updated successfully.' });
   });
 });
 

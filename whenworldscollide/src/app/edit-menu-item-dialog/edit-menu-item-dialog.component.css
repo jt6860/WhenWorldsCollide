@@ -1,0 +1,40 @@
+.edit-menu-item-dialog {
+    width: 90%;
+    /* Occupy most of the width on smaller screens */
+    max-width: 600px;
+    /* Limit width on larger screens */
+    margin: 20px auto;
+    /* Center the dialog */
+}
+
+.mat-dialog-content {
+    display: grid;
+    grid-template-columns: 1fr;
+    /* Single column layout */
+    grid-gap: 15px;
+}
+
+/* Style for the form fields */
+.mat-form-field {
+    width: 100%;
+    /* Full width for form fields */
+}
+
+/* Style for the buttons */
+.mat-dialog-actions {
+    justify-content: flex-end;
+}
+
+/* Smaller screen adjustments */
+@media (max-width: 400px) {
+    .edit-menu-item-dialog .mat-dialog-actions {
+        flex-direction: column;
+        /* Stack buttons vertically */
+        align-items: stretch;
+        /* Make buttons full width */
+    }
+
+    .mat-dialog-actions button {
+        margin-bottom: 10px;
+    }
+}

@@ -1,16 +1,19 @@
+// admin.component.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AuthService } from '../auth.service';
 import { Router } from '@angular/router';
 import { FormsModule, NgForm } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
+import { MenuEditingComponent } from '../menu-editing/menu-editing.component';
+import { ContactSubmissionComponent } from '../contact-submission/contact-submission.component'; // Import the new component
 
 @Component({
   selector: 'app-admin',
   standalone: true,
   templateUrl: './admin.component.html',
   styleUrls: ['./admin.component.css'],
-  imports: [CommonModule, FormsModule]
+  imports: [CommonModule, FormsModule, MenuEditingComponent, ContactSubmissionComponent]
 })
 export class AdminComponent implements OnInit, OnDestroy {
   isLoggedIn = false;
@@ -18,22 +21,23 @@ export class AdminComponent implements OnInit, OnDestroy {
   errorMessage: string = '';
   username = '';
   password = '';
+  activeSection: 'menu' | 'contacts' | null = null; // Track the active section
   private isLoggedInSubscription: Subscription = new Subscription();
 
   constructor(private authService: AuthService, private router: Router) { }
 
   ngOnInit() {
-    // Subscribe to isLoggedIn$ to get the current and future login status
     this.isLoggedInSubscription = this.authService.isLoggedIn$.subscribe(isLoggedIn => {
       this.isLoggedIn = isLoggedIn;
       if (this.isLoggedIn) {
-        this.router.navigate(['/admin']); // Redirect if already logged in
+        this.router.navigate(['/admin']);
+        this.activeSection = 'menu'; // Default to menu editing on login
       }
     });
   }
 
   ngOnDestroy() {
-    this.isLoggedInSubscription.unsubscribe(); // Prevent memory leaks
+    this.isLoggedInSubscription.unsubscribe();
   }
 
   onToggleMode() {
@@ -54,7 +58,7 @@ export class AdminComponent implements OnInit, OnDestroy {
 
       this.authService.login(authData).subscribe({
         next: () => {
-          this.errorMessage = ''; //Clear error message on successful login
+          this.errorMessage = '';
         },
         error: (error: { message: string; }) => {
           this.errorMessage = error.message;
@@ -74,6 +78,11 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.isLoggedIn = false;
     this.isLoginMode = true;
     this.errorMessage = '';
+    this.activeSection = null; // Reset active section
     this.router.navigate(['/']);
+  }
+
+  showSection(section: 'menu' | 'contacts'): void {
+    this.activeSection = section;
   }
 }
