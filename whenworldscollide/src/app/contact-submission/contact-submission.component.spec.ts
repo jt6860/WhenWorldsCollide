@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { ContactSubmissionComponent } from './contact-submission.component';
+import { HttpClientTestingModule } from '@angular/common/http/testing'; // Import
 
 describe('ContactSubmissionComponent', () => {
   let component: ContactSubmissionComponent;
@@ -8,7 +8,7 @@ describe('ContactSubmissionComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ContactSubmissionComponent]
+      imports: [ContactSubmissionComponent, HttpClientTestingModule] // Include in imports
     })
     .compileComponents();
 

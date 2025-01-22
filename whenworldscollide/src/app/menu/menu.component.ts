@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MenuService } from '../menu.service'; // Update with correct path
 import { Subscription } from 'rxjs';
 
-interface MenuItem {
+export interface MenuItem {
   id: number;
   name: string;
   description: string;
