@@ -52,6 +52,16 @@ appExpress.get('/api/contact', (req, res) => {
   });
 });
 
+appExpress.get('/api/orders', (req, res) => {
+  db.all('SELECT * FROM customerorder', (err, rows) => {
+    if (err) {
+      console.error('Error fetching orders:', err);
+      return res.status(500).json({ error: err.message });
+    }
+    res.json(rows);
+  });
+});
+
 // POSTS
 appExpress.post('/api/contact', (req, res) => {
   const { name, email, message } = req.body;
@@ -96,6 +106,30 @@ appExpress.post('/api/login', (req, res) => {
       return res.status(401).json({ message: 'Invalid username or password.' });
     }
   });
+});
+
+appExpress.post('/api/orders', (req, res) => {
+  const { name, orderitems, totalprice } = req.body;
+
+  if (!name || !orderitems || totalprice === undefined) {
+    return res.status(400).json({ error: 'Invalid order data.' });
+  }
+
+  const orderItemsArray = JSON.parse(orderitems);
+
+  const insertOrder = db.prepare('INSERT INTO customerorder (name, orderitems, totalprice) VALUES (?, ?, ?)');
+  insertOrder.run(name, orderitems, totalprice, function (err) {
+    if (err) {
+      console.error('Error inserting order:', err.message);
+      return res.status(500).json({ error: 'Failed to save order.' });
+    }
+
+    const orderId = this.lastID; // Get the ID of the newly inserted order
+
+    console.log('Order saved successfully:', { name, orderitems: orderItemsArray, totalprice });
+    res.status(200).json({ message: 'Order submitted successfully!', orderId });
+  });
+  insertOrder.finalize();
 });
 
 // PUTS

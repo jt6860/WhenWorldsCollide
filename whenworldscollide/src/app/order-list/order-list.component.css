@@ -1,0 +1,41 @@
+/* order-list.component.css */
+
+h2 {
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+  
+  th {
+    background-color: #f2f2f2; /* Light gray background */
+    text-align: left;
+    padding: 12px 8px;
+  }
+  
+  td {
+    padding: 10px 8px;
+    border-bottom: 1px solid #ddd; /* Subtle border between rows */
+  }
+  
+  td ul {
+    list-style: none; /* Remove bullet points */
+    padding: 0;
+    margin: 0;
+  }
+  
+  td li {
+    margin-bottom: 5px; /* Add some space between items */
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    table {
+      display: block; /* Make table scrollable horizontally on small screens */
+      overflow-x: auto;
+    }
+  }

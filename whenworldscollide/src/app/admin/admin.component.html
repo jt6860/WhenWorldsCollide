@@ -30,6 +30,7 @@
         <ul>
           <li><button (click)="showSection('menu')">Menu Editing</button></li>
           <li><button (click)="showSection('contacts')">Contact Submissions</button></li>
+          <li><button (click)="showSection('orders')">Customer Orders</button></li>
         </ul>
       </nav>
 
@@ -39,6 +40,10 @@
 
       <section *ngIf="activeSection === 'contacts'">
         <app-contact-submission></app-contact-submission>
+      </section>
+
+      <section *ngIf="activeSection === 'orders'">
+        <app-order-list></app-order-list>
       </section>
 
       <button (click)="onLogout()">Logout</button>

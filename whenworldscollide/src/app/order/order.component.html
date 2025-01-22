@@ -1,1 +1,38 @@
-<p>order works!</p>
+<h2>Place Your Order</h2>
+
+<div class="menu-items">
+  <div *ngFor="let item of menuItems" class="menu-item">
+    <h3>{{ item.name }}</h3>
+    <p>{{ item.description }}</p>
+    <p>Price: ${{ item.price }}</p>
+    <button (click)="addToOrder(item)">Add to Order</button>
+  </div>
+</div>
+
+<div class="order-summary">
+  <h3>Your Order</h3>
+  <div *ngIf="orderItems.length > 0">
+    <div *ngFor="let orderItem of orderItems" class="order-item">
+      <p>{{ orderItem.menuItem.name }} ({{ orderItem.menuItem.price | currency }})</p>
+      <input type="number" [(ngModel)]="orderItem.quantity" (change)="updateQuantity(orderItem, orderItem.quantity)" min="1">
+      <button (click)="removeFromOrder(orderItem)">Remove</button>
+    </div>
+    <p>Total: {{ orderTotal | currency }}</p>
+  </div>
+  <p *ngIf="orderItems.length === 0">Your order is empty.</p>
+</div>
+
+<div class="customer-info">
+  <label for="customerName">Your Name:</label>
+  <input type="text" id="customerName" [(ngModel)]="customerName">
+</div>
+
+<button (click)="submitOrder()" [disabled]="orderItems.length === 0 || !customerName">Submit Order</button>
+
+<div *ngIf="confirmationMessage" class="confirmation-message">
+  {{ confirmationMessage }}
+</div>
+
+<div *ngIf="errorMessage" class="error-message">
+  {{ errorMessage }}
+</div>

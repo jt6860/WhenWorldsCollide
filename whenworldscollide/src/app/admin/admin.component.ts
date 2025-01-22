@@ -7,13 +7,14 @@ import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { MenuEditingComponent } from '../menu-editing/menu-editing.component';
 import { ContactSubmissionComponent } from '../contact-submission/contact-submission.component'; // Import the new component
+import { OrderListComponent } from '../order-list/order-list.component';
 
 @Component({
   selector: 'app-admin',
   standalone: true,
   templateUrl: './admin.component.html',
   styleUrls: ['./admin.component.css'],
-  imports: [CommonModule, FormsModule, MenuEditingComponent, ContactSubmissionComponent]
+  imports: [CommonModule, FormsModule, MenuEditingComponent, ContactSubmissionComponent, OrderListComponent]
 })
 export class AdminComponent implements OnInit, OnDestroy {
   isLoggedIn = false;
@@ -21,7 +22,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   errorMessage: string = '';
   username = '';
   password = '';
-  activeSection: 'menu' | 'contacts' | null = null; // Track the active section
+  activeSection: 'menu' | 'contacts' | 'orders' | null = null; // Track the active section
   private isLoggedInSubscription: Subscription = new Subscription();
 
   constructor(private authService: AuthService, private router: Router) { }
@@ -82,7 +83,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.router.navigate(['/']);
   }
 
-  showSection(section: 'menu' | 'contacts'): void {
+  showSection(section: 'menu' | 'contacts' | 'orders'): void {
     this.activeSection = section;
   }
 }
