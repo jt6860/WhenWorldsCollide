@@ -12,7 +12,7 @@ interface Order {
   totalprice: number;
 }
 
-// Interface for MenuItem (you might already have this defined elsewhere)
+// Interface for MenuItem
 interface MenuItem {
   id: number;
   name: string;
