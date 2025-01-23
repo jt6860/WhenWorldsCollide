@@ -227,7 +227,7 @@ This section provides a detailed overview of each component within the applicati
 1.  **Clone the repository:**
 
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/jt6860/WhenWorldsCollide.git
     cd whenworldscollide
     ```
 
