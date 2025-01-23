@@ -1,9 +1,8 @@
-// contact-submissions.component.ts
 import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 
-interface ContactSubmission {
+export interface ContactSubmission {
   id: number;
   name: string;
   email: string;
@@ -32,7 +31,7 @@ export class ContactSubmissionComponent implements OnInit {
         next: (data) => {
           this.submissions = data;
         },
-        error: (error) => {
+        error: (error: HttpErrorResponse) => { // Type the error as HttpErrorResponse
           console.error('Error fetching contact submissions:', error);
         }
       });

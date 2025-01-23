@@ -34,8 +34,10 @@ export class AuthService {
   }
 
   logout() {
-    this.setLoginStatus(false);
-    this.setCurrentUser(null);
+    this.isLoggedInSubject.next(false);
+    this.currentUserSubject.next(null);
+    sessionStorage.removeItem('isLoggedIn');
+    sessionStorage.removeItem('currentUser');
   }
 
   private setLoginStatus(status: boolean) {
@@ -48,7 +50,7 @@ export class AuthService {
       const storedLogin = sessionStorage.getItem('isLoggedIn');
       return storedLogin ? JSON.parse(storedLogin) : false;
     } catch (error) {
-      console.error("Error parsing stored login status:", error);
+      console.error('Error parsing stored login status:', error);
       sessionStorage.removeItem('isLoggedIn');
       return false;
     }
@@ -64,26 +66,25 @@ export class AuthService {
       const storedUser = sessionStorage.getItem('currentUser');
       return storedUser ? JSON.parse(storedUser) : null;
     } catch (error) {
-      console.error("Error parsing stored user:", error);
+      console.error('Error parsing stored user:', error);
       sessionStorage.removeItem('currentUser');
       return null;
     }
   }
 
-  private handleError(errorRes: HttpErrorResponse) {
+  private handleError(error: HttpErrorResponse) {
     let errorMessage = 'An unknown error occurred!';
-    if (!errorRes.error || !errorRes.error.message) {
-      return throwError(() => new Error(errorMessage));
-    }
-    switch (errorRes.error.message) {
-      case 'Invalid username or password.':
-        errorMessage = 'Invalid username or password.';
-        break;
-      case 'Login error.':
-        errorMessage = 'A server error has occurred, please try again later.';
-        break;
-      default:
-        errorMessage = errorRes.error.message;
+    if (error.error && error.error.message) {
+        switch (error.error.message) {
+            case 'Invalid username or password.':
+                errorMessage = 'Invalid username or password.';
+                break;
+            case 'Login error.':
+                errorMessage = 'A server error has occurred, please try again later.';
+                break;
+            default:
+                errorMessage = error.error.message;
+        }
     }
     return throwError(() => new Error(errorMessage));
   }

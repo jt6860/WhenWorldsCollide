@@ -18,6 +18,13 @@ interface OrderItem {
   quantity: number;
 }
 
+export interface Order {
+  id: number;
+  name: string;
+  orderitems: string; // Keep as string since it's JSON
+  totalprice: number;
+}
+
 @Component({
   selector: 'app-order',
   standalone: true,

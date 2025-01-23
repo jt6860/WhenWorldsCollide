@@ -1,9 +1,9 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Injectable, Optional, Inject } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 
-interface MenuItem {
+export interface MenuItem {
   id: number;
   name: string;
   description: string;
@@ -15,23 +15,31 @@ interface MenuItem {
   providedIn: 'root'
 })
 export class MenuService {
-  private menuItemsSubject = new BehaviorSubject<MenuItem[]>([]);
-  menuItems$ = this.menuItemsSubject.asObservable();
+  private menuItemsSubject: BehaviorSubject<MenuItem[]>;
+  menuItems$: Observable<MenuItem[]>;
 
   private apiUrl = 'http://localhost:3000/api/menu';
 
-  constructor(private http: HttpClient) {
-    this.fetchMenuItems();
+  constructor(
+    private http: HttpClient,
+    @Optional() @Inject('mockMenuItems') initialMenuItems: MenuItem[] = []
+  ) {
+    this.menuItemsSubject = new BehaviorSubject<MenuItem[]>(initialMenuItems);
+    this.menuItems$ = this.menuItemsSubject.asObservable();
+    if (!initialMenuItems || initialMenuItems.length === 0) {
+      this.loadMenuItems().subscribe();
+    }
   }
 
-  private fetchMenuItems(): void {
-    this.http.get<MenuItem[]>(this.apiUrl)
+  loadMenuItems(): Observable<MenuItem[]> {
+    return this.http.get<MenuItem[]>(this.apiUrl)
       .pipe(
-        tap(menuItems => this.menuItemsSubject.next(menuItems))
-      )
-      .subscribe({
-        error: (error) => console.error('Error fetching menu items:', error)
-      });
+        tap(menuItems => this.menuItemsSubject.next(menuItems)),
+        catchError((error) => {
+          console.error('Error fetching menu items:', error);
+          return throwError(() => new Error('Error fetching menu items.'));
+        })
+      );
   }
 
   getMenuItemById(id: number): MenuItem | undefined {
@@ -49,8 +57,8 @@ export class MenuService {
       }),
       catchError((error) => {
         console.error('Error updating menu item:', error);
-        // You can do more sophisticated error handling here, like showing a user-friendly message.
-        return throwError(() => new Error('Failed to update menu item.')); // Re-throw the error to be handled by the component
+        // Throw the correct error message
+        return throwError(() => new Error('An error occurred. Please try again later.'));
       })
     );
   }

@@ -22,8 +22,13 @@ export class MenuEditingComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
-    this.menuItemsSubscription = this.menuService.menuItems$.subscribe(
-      items => this.menuItems = items
+    this.menuService.loadMenuItems().subscribe( // Load the items
+      items => {
+        this.menuItems = items;
+        this.menuItemsSubscription = this.menuService.menuItems$.subscribe( // Then subscribe
+          updatedItems => this.menuItems = updatedItems
+        );
+      }
     );
   }
 
@@ -48,9 +53,10 @@ export class MenuEditingComponent implements OnInit, OnDestroy {
     this.menuService.updateMenuItem(menuItem).subscribe({
       next: () => {
         console.log('Updated menu item successfully');
+        // Assuming loadMenuItems returns an observable that completes after fetching
+        this.menuService.loadMenuItems().subscribe(); // Refresh the list
       },
       error: (error) => {
-        // Error handling
         console.error('Error updating menu item:', error);
       }
     });
