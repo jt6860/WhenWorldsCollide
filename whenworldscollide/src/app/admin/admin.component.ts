@@ -24,6 +24,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   password = ''; // Stores the entered password
   activeSection: 'menu' | 'contacts' | 'orders' | null = null; // Tracks which section is currently active
   private isLoggedInSubscription: Subscription = new Subscription(); // Subscription for login status observable
+  confirmPassword = '';
 
   // Constructor with AuthService and Router injection
   constructor(private authService: AuthService, private router: Router) { }
@@ -78,14 +79,34 @@ export class AdminComponent implements OnInit, OnDestroy {
         }
       });
     } else {
-      // Handle registration if in registration mode (if needed)
-      // ... (Registration logic would go here) ...
+      // Handle registration
+      if (this.password !== this.confirmPassword) {
+        this.errorMessage = 'Passwords do not match.';
+        return;
+      }
+
+      const regData = {
+        username: this.username,
+        password: this.password
+      };
+
+      this.authService.register(regData).subscribe({
+        next: () => {
+          this.errorMessage = '';
+          this.isLoginMode = true;
+        },
+        error: (error: { message: string; }) => {
+          this.errorMessage = error.message;
+          console.error('Registration error:', error);
+        }
+      });
     }
 
     // Reset the form after submission
     form.resetForm();
     this.username = '';
     this.password = '';
+    this.confirmPassword = '';
   }
 
   // Handle user logout

@@ -12,7 +12,7 @@
       </div>
       <div *ngIf="!isLoginMode" class="form-group">
         <label for="confirmPassword">Confirm Password:</label>
-        <input type="password" id="confirmPassword" name="confirmPassword" ngModel required>
+        <input type="password" id="confirmPassword" name="confirmPassword" [(ngModel)]="confirmPassword" required>
       </div>
       <button type="submit">{{ isLoginMode ? 'Login' : 'Register' }}</button>
       <button type="button" (click)="onToggleMode()">

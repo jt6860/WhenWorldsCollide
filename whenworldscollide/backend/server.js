@@ -5,6 +5,7 @@ const { db } = require('./database');
 const { app } = require('electron');
 const path = require('path');
 const bodyParser = require('body-parser');
+const bcrypt = require('bcrypt');
 
 const appExpress = express();
 const port = 3000;
@@ -83,6 +84,45 @@ appExpress.post('/api/contact', (req, res) => {
   });
 });
 
+// POST for registration
+appExpress.post('/api/register', (req, res) => {
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res.status(400).json({ message: 'Username and password are required.' });
+  }
+
+  const checkUserQuery = 'SELECT * FROM admincredentials WHERE username = ?';
+  db.get(checkUserQuery, [username], (err, row) => {
+    if (err) {
+      console.error('Database query error:', err);
+      return res.status(500).json({ message: 'Registration error.' });
+    }
+
+    if (row) {
+      return res.status(409).json({ message: 'Username already exists.' });
+    } else {
+      bcrypt.hash(password, 10, (err, hashedPassword) => {
+        if (err) {
+          console.error('Error hashing password:', err);
+          return res.status(500).json({ message: 'Registration error.' });
+        }
+
+        const insertQuery = 'INSERT INTO admincredentials (username, password) VALUES (?, ?)';
+        db.run(insertQuery, [username, hashedPassword], (err) => {
+          if (err) {
+            console.error('Database insert error:', err);
+            return res.status(500).json({ message: 'Registration error.' });
+          }
+
+          res.status(201).json({ message: 'Registration successful.', username: username });
+        });
+      });
+    }
+  });
+});
+
+// POST for login
 appExpress.post('/api/login', (req, res) => {
   const { username, password } = req.body;
 
@@ -90,17 +130,28 @@ appExpress.post('/api/login', (req, res) => {
     return res.status(400).json({ message: 'Username and password are required.' });
   }
 
-  const query = 'SELECT * FROM admincredentials WHERE username = ? AND password = ?'; // Compare username and password directly
+  const query = 'SELECT * FROM admincredentials WHERE username = ?';
 
-  db.get(query, [username, password], (err, row) => {
+  db.get(query, [username], (err, row) => {
     if (err) {
       console.error('Database query error:', err);
       return res.status(500).json({ message: 'Login error.' });
     }
 
     if (row) {
-      console.log("Login successful!");
-      res.status(200).json({ message: 'Login successful.', username: row.username });
+      bcrypt.compare(password, row.password, (err, result) => {
+        if (err) {
+          console.error('Error comparing passwords:', err);
+          return res.status(500).json({ message: 'Login error.' });
+        }
+        if (result) {
+          console.log("Login successful!");
+          res.status(200).json({ message: 'Login successful.', username: row.username });
+        } else {
+          console.log("Invalid credentials");
+          return res.status(401).json({ message: 'Invalid username or password.' });
+        }
+      });
     } else {
       console.log("Invalid credentials");
       return res.status(401).json({ message: 'Invalid username or password.' });

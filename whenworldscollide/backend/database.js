@@ -2,6 +2,7 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fs = require('fs');
 const { app } = require('electron');
+const bcrypt = require('bcrypt');
 
 // Get the userData path. This works in both packaged and unpacked contexts.
 const userDataPath = app ? app.getPath('userData') : path.join(__dirname, 'userData');
@@ -22,24 +23,33 @@ function initialCNI() {
   db.serialize(() => {
     // Create the admincredentials table
     db.run(`CREATE TABLE IF NOT EXISTS admincredentials (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT NOT NULL,
-    password TEXT NOT NULL
-  )`);
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT NOT NULL,
+      password TEXT NOT NULL
+    )`);
 
-    // Insert admin credentials
-    const adminCredentials = [
-      { username: 'jtorres', password: 'passwordjt' },
-      { username: 'rmarshall', password: 'passwordrm' },
-      { username: 'dmunoz', password: 'passworddm' },
-      { username: 'jcollins', password: 'passwordjc' }
-    ];
+    // Hash the default passwords
+    const saltRounds = 10;
+    const defaultPasswords = {
+      jtorres: 'passwordjt',
+      rmarshall: 'passwordrm',
+      dmunoz: 'passworddm',
+      jcollins: 'passwordjc'
+    };
 
-    const stmt = db.prepare('INSERT INTO admincredentials (username, password) VALUES (?, ?)');
-    adminCredentials.forEach((credentials) => {
-      stmt.run(credentials.username, credentials.password);
-    });
-    stmt.finalize();
+    for (const username in defaultPasswords) {
+      bcrypt.hash(defaultPasswords[username], saltRounds, (err, hashedPassword) => {
+        if (err) {
+          console.error('Error hashing password:', err);
+          return;
+        }
+
+        // Insert admin credentials with hashed passwords
+        const stmt = db.prepare('INSERT OR IGNORE INTO admincredentials (username, password) VALUES (?, ?)');
+        stmt.run(username, hashedPassword);
+        stmt.finalize();
+      });
+    }
 
     // Create the menuitems table
     db.run(`CREATE TABLE IF NOT EXISTS menuitems (

@@ -9,7 +9,6 @@ export interface AuthResponseData {
   username?: string; // Optional username (might not be present in all responses)
 }
 
-// Interface to define the structure of the authentication data (username and password)
 interface AuthData {
   username: string;
   password: string;
@@ -50,6 +49,12 @@ export class AuthService {
   }
 
   // Method to handle user logout
+  register(regData: AuthData): Observable<AuthResponseData> {
+    return this.http.post<AuthResponseData>(`${this.apiUrl}/register`, regData).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   logout() {
     // Set the login status to false
     this.isLoggedInSubject.next(false);
@@ -118,6 +123,9 @@ export class AuthService {
           break;
         case 'Login error.':
           errorMessage = 'A server error has occurred, please try again later.';
+          break;
+        case 'Username already exists.':
+          errorMessage = 'Username already exists.';
           break;
         default:
           errorMessage = error.error.message;
