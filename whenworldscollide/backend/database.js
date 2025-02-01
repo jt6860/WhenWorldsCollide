@@ -1,24 +1,48 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fs = require('fs');
-const { app } = require('electron');
+const { app, dialog } = require('electron');
 const bcrypt = require('bcrypt');
 
-// Get the userData path. This works in both packaged and unpacked contexts.
-const userDataPath = app ? app.getPath('userData') : path.join(__dirname, 'userData');
+const isDev = !app.isPackaged; // Easier check for development mode
+
+const userDataPath = isDev
+  ? path.join(__dirname, 'userData') // Development: 'userData' next to database.js
+  : app.getPath('userData'); // Production: User data directory
+
 const dbPath = path.join(userDataPath, 'whenworldscollide.db');
 
-//Create the user data directory if it doesn't exist.
+// Create the user data directory if it doesn't exist
 fs.mkdirSync(userDataPath, { recursive: true });
 
-// Check if the database file exists. If not, copy it from the resources folder
+// Check if the database exists, create it if it doesn't
 if (!fs.existsSync(dbPath)) {
-  const sourceDbPath = app ? path.join(process.resourcesPath, 'whenworldscollide.db') : 'whenworldscollide.db';
-  fs.copyFileSync(sourceDbPath, dbPath);
-  console.log("Database copied to userData directory")
+  console.log('Database does not exist at', dbPath);
+
+  const sourceDbPath = isDev
+    ? path.join(__dirname, 'whenworldscollide.db') // Development: db in the backend folder
+    : path.join(process.resourcesPath, 'backend', 'whenworldscollide.db'); // Production: db in resources
+
+  // Check if a source database exists to copy from
+  if (fs.existsSync(sourceDbPath)) {
+    try {
+      fs.copyFileSync(sourceDbPath, dbPath);
+      console.log('Database copied to userData directory');
+    } catch (err) {
+      console.error('Error copying database:', err);
+      // You can handle this more gracefully, e.g., show an error dialog
+    }
+  } else {
+    // If no source database exists, create an empty database
+    console.log('No source database found. Creating an empty database.');
+    const newDb = new sqlite3.Database(dbPath);
+    newDb.close(); // Immediately close to release the file lock
+    console.log('Empty database created at', dbPath);
+  }
 }
 
 const db = new sqlite3.Database(dbPath);
+
 function initialCNI() {
   db.serialize(() => {
     // Create the admincredentials table
