@@ -6,14 +6,35 @@ const { app } = require('electron');
 const path = require('path');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
+const rateLimit = require('express-rate-limit'); // Import express-rate-limit
+const helmet = require('helmet');
 
 const appExpress = express();
 const port = 3000;
 let server;
 
+// Use Helmet for setting various HTTP headers to enhance security
+appExpress.use(helmet());
+
+// Basic rate-limiting to prevent brute-force attacks against authentication
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: "Too many login attempts from this IP, please try again after 15 minutes"
+});
+appExpress.use('/api/login', authLimiter);
+appExpress.use('/api/register', authLimiter);
+
+// Enable CORS with specific options (customize as needed)
+appExpress.use(cors({
+  origin: 'http://localhost:4200', // Only allow requests from your frontend origin
+  methods: ['GET', 'POST', 'PUT'],    // Specify allowed methods
+  allowedHeaders: ['Content-Type', 'Authorization'] // Control allowed headers
+}));
+
 appExpress.use(express.json());
-appExpress.use(cors());
-appExpress.use(bodyParser.json());
+// Parse JSON request bodies with a size limit (mitigates DoS)
+appExpress.use(bodyParser.json({ limit: '10kb' }));
 
 dbFunctions.initialCNI();
 
@@ -32,6 +53,7 @@ appExpress.get('/', (req, res) => {
   res.send('Hello from Express!');
 });
 
+// Example of parameterized query to prevent SQL injection
 appExpress.get('/api/menu', (req, res) => {
   db.all('SELECT * FROM menuitems', (err, rows) => {
     if (err) {
@@ -64,17 +86,27 @@ appExpress.get('/api/orders', (req, res) => {
 });
 
 // POSTS
+// Contact Form Submission
 appExpress.post('/api/contact', (req, res) => {
   const { name, email, message } = req.body;
 
-  console.log('Incoming Contact Request:', req.body);
-
+  // Basic input validation
   if (!name || !email || !message) {
     return res.status(400).json({ error: 'All fields are required.' });
   }
+  if (name.length > 20) { // Name length limit
+    return res.status(400).json({ error: 'Name is too long.' });
+  }
 
+  // Basic email format validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ error: 'Invalid email format.' });
+  }
+
+  // Use parameterized queries to prevent SQL injection
   const query = 'INSERT INTO contacts (name, email, message) VALUES (?, ?, ?)';
-  db.run(query, [name, email, message], (err) => {
+  db.run(query, [name, email, message], (err) => { // Using parameterization
     if (err) {
       console.error('Error inserting contact form data:', err.message);
       return res.status(500).json({ error: 'Failed to save contact form data.' });
@@ -88,10 +120,12 @@ appExpress.post('/api/contact', (req, res) => {
 appExpress.post('/api/register', (req, res) => {
   const { username, password } = req.body;
 
+  // Basic input validation
   if (!username || !password) {
     return res.status(400).json({ message: 'Username and password are required.' });
   }
 
+  // Check for username existence
   const checkUserQuery = 'SELECT * FROM admincredentials WHERE username = ?';
   db.get(checkUserQuery, [username], (err, row) => {
     if (err) {
@@ -102,12 +136,14 @@ appExpress.post('/api/register', (req, res) => {
     if (row) {
       return res.status(409).json({ message: 'Username already exists.' });
     } else {
+      // Hash the password
       bcrypt.hash(password, 10, (err, hashedPassword) => {
         if (err) {
           console.error('Error hashing password:', err);
           return res.status(500).json({ message: 'Registration error.' });
         }
 
+        // Insert new user with hashed password
         const insertQuery = 'INSERT INTO admincredentials (username, password) VALUES (?, ?)';
         db.run(insertQuery, [username, hashedPassword], (err) => {
           if (err) {
@@ -126,6 +162,7 @@ appExpress.post('/api/register', (req, res) => {
 appExpress.post('/api/login', (req, res) => {
   const { username, password } = req.body;
 
+  // Basic input validation
   if (!username || !password) {
     return res.status(400).json({ message: 'Username and password are required.' });
   }
@@ -139,11 +176,13 @@ appExpress.post('/api/login', (req, res) => {
     }
 
     if (row) {
+      // Compare the provided password with the hashed password in the database
       bcrypt.compare(password, row.password, (err, result) => {
         if (err) {
           console.error('Error comparing passwords:', err);
           return res.status(500).json({ message: 'Login error.' });
         }
+
         if (result) {
           console.log("Login successful!");
           res.status(200).json({ message: 'Login successful.', username: row.username });
@@ -159,17 +198,37 @@ appExpress.post('/api/login', (req, res) => {
   });
 });
 
+// POST for submitting an order
 appExpress.post('/api/orders', (req, res) => {
   const { name, orderitems, totalprice } = req.body;
 
+  // Basic input validation
   if (!name || !orderitems || totalprice === undefined) {
     return res.status(400).json({ error: 'Invalid order data.' });
   }
 
-  const orderItemsArray = JSON.parse(orderitems);
+  // Prevent prototype pollution
+  if (orderitems.indexOf('__proto__') !== -1 || orderitems.indexOf('constructor') !== -1 || orderitems.indexOf('prototype') !== -1) {
+    return res.status(400).json({ error: 'Invalid order data.' });
+  }
+
+  // Convert orderitems from JSON string to array for further processing if needed
+  let orderItemsArray;
+  try {
+    orderItemsArray = JSON.parse(orderitems);
+    if (!Array.isArray(orderItemsArray)) {
+      throw new Error('Parsed orderitems is not an array');
+    }
+  } catch (error) {
+    console.error('Error parsing orderitems:', error);
+    return res.status(400).json({ error: 'Invalid order items data.' });
+  }
+
+  // Convert the orderitems array back to a JSON string for database insertion
+  const orderitemsString = JSON.stringify(orderItemsArray);
 
   const insertOrder = db.prepare('INSERT INTO customerorder (name, orderitems, totalprice) VALUES (?, ?, ?)');
-  insertOrder.run(name, orderitems, totalprice, function (err) {
+  insertOrder.run(name, orderitemsString, totalprice, function (err) {
     if (err) {
       console.error('Error inserting order:', err.message);
       return res.status(500).json({ error: 'Failed to save order.' });
@@ -187,6 +246,12 @@ appExpress.post('/api/orders', (req, res) => {
 appExpress.put('/api/menu/:id', (req, res) => {
   const id = req.params.id;
   const { name, description, category, price } = req.body;
+
+  // Basic input validation
+  if (!name || !description || !category || price === undefined) {
+    return res.status(400).json({ error: 'Incomplete menu item data.' });
+  }
+
 
   const query = 'UPDATE menuitems SET name = ?, description = ?, category = ?, price = ? WHERE id = ?';
   db.run(query, [name, description, category, price, id], (err) => {
