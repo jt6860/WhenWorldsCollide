@@ -7,6 +7,8 @@
 /bazel-out
 /out/
 /out
+/out/make
+/out/make/
 
 
 # Node
