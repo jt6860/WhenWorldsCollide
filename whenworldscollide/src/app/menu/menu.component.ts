@@ -1,16 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MenuService } from '../menu.service'; // Update with correct path
+import { MenuService, MenuItem } from '../menu.service';
 import { Subscription } from 'rxjs';
-
-// Interface for the MenuItem object structure
-export interface MenuItem {
-  id: number;
-  name: string;
-  description: string;
-  category: string;
-  price: number;
-}
 
 @Component({
   selector: 'app-menu', // Selector for using this component in HTML templates
@@ -29,7 +20,9 @@ export class MenuComponent implements OnInit, OnDestroy {
   ngOnInit() {
     // Subscribe to the menuItems$ observable to get updates on menu items
     this.menuItemsSubscription = this.menuService.menuItems$.subscribe(
-      data => this.menuItems = data // Update the menuItems array with the data received
+      (data) => {
+        this.menuItems = data;
+      }
     );
   }
 

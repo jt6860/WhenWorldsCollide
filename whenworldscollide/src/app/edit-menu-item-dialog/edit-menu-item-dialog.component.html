@@ -1,23 +1,36 @@
 <h1 mat-dialog-title>Edit Menu Item</h1>
 <div mat-dialog-content>
-  <form>
+  <form *ngIf="data && data.menuItem">
     <mat-form-field appearance="fill">
       <mat-label>Name</mat-label>
-      <input matInput [(ngModel)]="menuItem.name" name="name">
+      <input matInput [(ngModel)]="data.menuItem.name" name="name" required />
     </mat-form-field>
 
     <mat-form-field appearance="fill">
       <mat-label>Description</mat-label>
-      <textarea matInput [(ngModel)]="menuItem.description" name="description"></textarea>
+      <textarea
+        matInput
+        [(ngModel)]="data.menuItem.description"
+        name="description"
+      ></textarea>
     </mat-form-field>
 
     <mat-form-field appearance="fill">
       <mat-label>Price</mat-label>
-      <input matInput type="number" [(ngModel)]="menuItem.price" name="price">
+      <input
+        matInput
+        type="number"
+        [(ngModel)]="data.menuItem.price"
+        name="price"
+      />
     </mat-form-field>
   </form>
+  <div *ngIf="!data || !data.menuItem">
+    <p>Error: Menu item data is missing.</p>
+  </div>
 </div>
+
 <div mat-dialog-actions>
   <button mat-button (click)="onNoClick()">Cancel</button>
-  <button mat-raised-button color="primary" (click)="onSave()">Save</button>
+  <button mat-raised-button color="primary" (click)="onSave()" [disabled]="!data || !data.menuItem">Save</button>
 </div>

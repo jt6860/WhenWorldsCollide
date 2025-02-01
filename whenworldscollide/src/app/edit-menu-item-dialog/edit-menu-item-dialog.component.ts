@@ -10,6 +10,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { CommonModule } from '@angular/common';
+import { MenuItem } from '../menu.service';
 
 @Component({
   selector: 'app-edit-menu-item-dialog', // Component selector used in HTML
@@ -23,6 +25,7 @@ import { MatButtonModule } from '@angular/material/button';
     MatButtonModule,
     MatDialogTitle,
     MatInputModule,
+    CommonModule
   ],
   templateUrl: './edit-menu-item-dialog.component.html', // Path to the component's HTML template
   styleUrl: './edit-menu-item-dialog.component.css', // Path to the component's CSS styles
@@ -30,9 +33,21 @@ import { MatButtonModule } from '@angular/material/button';
 export class EditMenuItemDialogComponent {
   // Constructor with MatDialogRef and MAT_DIALOG_DATA injection
   constructor(
-    public dialogRef: MatDialogRef<EditMenuItemDialogComponent>, // Reference to the dialog itself
-    @Inject(MAT_DIALOG_DATA) public menuItem: any // Injected data (the menu item being edited)
-  ) { }
+    public dialogRef: MatDialogRef<EditMenuItemDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: { menuItem: MenuItem }
+  ) {
+    if (!this.data || !this.data.menuItem) {
+      console.error('EditMenuItemDialogComponent: No data or menuItem provided.');
+      this.dialogRef.close(); // Close the dialog if data is invalid
+    }
+  }
+
+  ngOnInit(): void {
+    if (!this.data || !this.data.menuItem) {
+      console.error('EditMenuItemDialogComponent: No data or menuItem provided.');
+      this.dialogRef.close(); // Close the dialog if data is invalid
+    }
+  }
 
   // Method called when the "Cancel" button is clicked
   onNoClick(): void {
@@ -43,6 +58,6 @@ export class EditMenuItemDialogComponent {
   // Method called when the "Save" button is clicked
   onSave(): void {
     // Close the dialog, returning the (potentially modified) menuItem data
-    this.dialogRef.close(this.menuItem);
+      this.dialogRef.close(this.data.menuItem);
   }
 }

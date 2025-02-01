@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MenuComponent, MenuItem } from './menu.component';
-import { MenuService } from '../menu.service';
+import { MenuComponent } from './menu.component';
+import { MenuService, MenuItem } from '../menu.service';
 import { of } from 'rxjs';
 import { CommonModule } from '@angular/common';
 

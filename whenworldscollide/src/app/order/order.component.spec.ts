@@ -5,7 +5,7 @@ import { MenuService } from '../menu.service';
 import { of, throwError } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { MenuItem } from '../menu/menu.component'; // Assuming you have a MenuItem interface
+import { MenuItem } from '../menu.service'; // Assuming you have a MenuItem interface
 
 // Mock menu items
 const mockMenuItems: MenuItem[] = [

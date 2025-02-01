@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { EditMenuItemDialogComponent } from '../edit-menu-item-dialog/edit-menu-item-dialog.component';
 import { CommonModule } from '@angular/common';
-import { MenuService } from '../menu.service';
+import { MenuService, MenuItem } from '../menu.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -13,8 +13,8 @@ import { Subscription } from 'rxjs';
   styleUrl: './menu-editing.component.css' // Path to the component's CSS styles
 })
 export class MenuEditingComponent implements OnInit, OnDestroy {
-  menuItems: any[] = []; // Array to store menu items
-  private menuItemsSubscription: Subscription = new Subscription(); // Subscription for menu items observable
+  menuItems: MenuItem[] = [];
+  private menuItemsSubscription: Subscription = new Subscription();
 
   // Constructor with MatDialog and MenuService injection
   constructor(
@@ -39,12 +39,11 @@ export class MenuEditingComponent implements OnInit, OnDestroy {
     this.menuItemsSubscription.unsubscribe();
   }
 
-  // Open the Edit Menu Item dialog
-  openEditMenuItemDialog(menuItem: any) {
-    // Open the dialog using MatDialog, passing in the menu item data
+  openEditMenuItemDialog(menuItem: MenuItem) {
+    // Fix: Pass data in an object with the menuItem property
     const dialogRef = this.dialog.open(EditMenuItemDialogComponent, {
       width: '600px',
-      data: { ...menuItem } // Pass a copy of the menu item to avoid modifying the original directly
+      data: { menuItem: { ...menuItem} }, // Pass a copy of the menu item
     });
 
     // Subscribe to the afterClosed() event of the dialog reference
@@ -58,7 +57,7 @@ export class MenuEditingComponent implements OnInit, OnDestroy {
   }
 
   // Update the menu item using the MenuService
-  updateMenuItem(menuItem: any) {
+  updateMenuItem(menuItem: MenuItem) {
     this.menuService.updateMenuItem(menuItem).subscribe({
       next: () => {
         console.log('Updated menu item successfully');
@@ -67,7 +66,7 @@ export class MenuEditingComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Error updating menu item:', error);
-      }
+      },
     });
   }
 }

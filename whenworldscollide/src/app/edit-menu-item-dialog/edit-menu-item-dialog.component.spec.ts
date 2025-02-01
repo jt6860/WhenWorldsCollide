@@ -1,11 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { EditMenuItemDialogComponent } from './edit-menu-item-dialog.component';
 import {
   MatDialogRef,
   MAT_DIALOG_DATA,
-  MatDialogContent,
-  MatDialogActions,
-  MatDialogTitle,
 } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -14,25 +10,27 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatButtonModule } from '@angular/material/button';
 import { DebugElement } from '@angular/core';
 import { By } from '@angular/platform-browser';
-
-const mockDialogRef = {
-  close: jasmine.createSpy('close')
-};
+import { EditMenuItemDialogComponent } from './edit-menu-item-dialog.component';
+import { CommonModule } from '@angular/common';
 
 const mockMenuItem = {
   id: 1,
   name: 'Test Pizza',
   description: 'A delicious test pizza',
   price: 10.99,
-  category: 'Pizzas'
+  category: 'Test Category',
+  options: "[]"
 };
 
 describe('EditMenuItemDialogComponent', () => {
   let component: EditMenuItemDialogComponent;
   let fixture: ComponentFixture<EditMenuItemDialogComponent>;
   let de: DebugElement;
+  let mockDialogRef: jasmine.SpyObj<MatDialogRef<EditMenuItemDialogComponent>>;
 
   beforeEach(async () => {
+    mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
+
     await TestBed.configureTestingModule({
       imports: [
         FormsModule,
@@ -40,16 +38,14 @@ describe('EditMenuItemDialogComponent', () => {
         MatInputModule,
         BrowserAnimationsModule,
         MatButtonModule,
-        MatDialogContent,
-        MatDialogActions,
-        MatDialogTitle
+        CommonModule,
+        EditMenuItemDialogComponent
       ],
       providers: [
         { provide: MatDialogRef, useValue: mockDialogRef },
-        { provide: MAT_DIALOG_DATA, useValue: mockMenuItem }
-      ]
-    })
-    .compileComponents();
+        { provide: MAT_DIALOG_DATA, useValue: { menuItem: mockMenuItem } }, // Provide data in the correct format
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(EditMenuItemDialogComponent);
     component = fixture.componentInstance;
@@ -62,9 +58,9 @@ describe('EditMenuItemDialogComponent', () => {
   });
 
   it('should initialize with injected data', () => {
-    expect(component.menuItem.name).toBe(mockMenuItem.name);
-    expect(component.menuItem.description).toBe(mockMenuItem.description);
-    expect(component.menuItem.price).toBe(mockMenuItem.price);
+    expect(component.data.menuItem.name).toBe(mockMenuItem.name);
+    expect(component.data.menuItem.description).toBe(mockMenuItem.description);
+    expect(component.data.menuItem.price).toBe(mockMenuItem.price);
   });
 
   it('should close the dialog when onNoClick is called', () => {
@@ -72,19 +68,18 @@ describe('EditMenuItemDialogComponent', () => {
     expect(mockDialogRef.close).toHaveBeenCalled();
   });
 
-  it('should close the dialog with updated data when onSave is called', () => {
+  it('should close the dialog with updated menu item on onSave', () => {
     const updatedMenuItem = {
       ...mockMenuItem,
       name: 'Updated Test Pizza',
       description: 'An updated description',
       price: 12.99,
-      category: 'Signature Pizzas'
     };
   
-    component.menuItem = { ...updatedMenuItem };
+    component.data.menuItem = { ...updatedMenuItem }; // Update the data object
     component.onSave();
   
-    expect(mockDialogRef.close).toHaveBeenCalledWith(component.menuItem);
+    expect(mockDialogRef.close).toHaveBeenCalledWith(updatedMenuItem);
   });
 
   it('should display the correct title', () => {
@@ -98,7 +93,7 @@ describe('EditMenuItemDialogComponent', () => {
       const nameInput = de.query(By.css('input[name="name"]')).nativeElement;
       const descriptionInput = de.query(By.css('textarea[name="description"]')).nativeElement;
       const priceInput = de.query(By.css('input[name="price"]')).nativeElement;
-  
+    
       expect(nameInput.value).toBe(mockMenuItem.name);
       expect(descriptionInput.value).toBe(mockMenuItem.description);
       expect(priceInput.value).toBe(mockMenuItem.price.toString());
@@ -126,9 +121,9 @@ describe('EditMenuItemDialogComponent', () => {
 
     fixture.detectChanges();
 
-    expect(component.menuItem.name).toBe(newName);
-    expect(component.menuItem.description).toBe(newDescription);
-    expect(component.menuItem.price).toBe(newPrice);
+    expect(component.data.menuItem.name).toBe(newName);
+    expect(component.data.menuItem.description).toBe(newDescription);
+    expect(component.data.menuItem.price).toBe(newPrice);
   });
 
   it('should call onSave when the Save button is clicked', () => {

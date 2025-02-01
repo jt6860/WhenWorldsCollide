@@ -1,9 +1,9 @@
 import { Injectable, Optional, Inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, BehaviorSubject, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError, tap, map } from 'rxjs/operators';
 
-// Interface to define the structure of a MenuItem object
+// Interface for MenuItem
 export interface MenuItem {
   id: number;
   name: string;
@@ -40,35 +40,30 @@ export class MenuService {
     }
   }
 
-  // Method to load menu items from the API
+  // Fetch menu items
   loadMenuItems(): Observable<MenuItem[]> {
-    // Send a GET request to the /menu endpoint
-    return this.http.get<MenuItem[]>(this.apiUrl)
-      .pipe(
-        // Use tap operator to update the menuItemsSubject with the fetched data
-        tap(menuItems => this.menuItemsSubject.next(menuItems)),
-        // Use catchError operator to handle errors during the API call
-        catchError((error) => {
-          console.error('Error fetching menu items:', error);
-          // Throw a user-friendly error message
-          return throwError(() => new Error('Error fetching menu items.'));
-        })
-      );
+    return this.http.get<MenuItem[]>(`${this.apiUrl}`).pipe(
+      catchError((error) => {
+        console.error('Error fetching menu items:', error);
+        return throwError(() => new Error('Error fetching menu items.'));
+      }),
+      tap(menuItems => this.menuItemsSubject.next(menuItems))
+    );
   }
 
-  // Method to get a menu item by its ID
+  // Get menu item by ID
   getMenuItemById(id: number): MenuItem | undefined {
     // Find the menu item in the current BehaviorSubject value (array of menu items)
-    return this.menuItemsSubject.value.find(item => item.id === id);
+    return this.menuItemsSubject.value.find((item) => item.id === id);
   }
 
-  // Method to update a menu item
+  // Update menu item
   updateMenuItem(menuItem: MenuItem): Observable<any> {
     // Send a PUT request to the /menu/:id endpoint with the updated menu item data
     return this.http.put<any>(`${this.apiUrl}/${menuItem.id}`, menuItem).pipe(
       // Use tap operator to update the menuItemsSubject with the updated item
       tap(() => {
-        const updatedMenuItems = this.menuItemsSubject.value.map(item =>
+        const updatedMenuItems = this.menuItemsSubject.value.map((item) =>
           item.id === menuItem.id ? menuItem : item
         );
         this.menuItemsSubject.next(updatedMenuItems);

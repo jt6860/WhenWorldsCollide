@@ -63,10 +63,13 @@ describe('MenuEditingComponent', () => {
     const mockDialogRef = jasmine.createSpyObj('dialogRef', ['afterClosed']);
     mockDialogRef.afterClosed.and.returnValue(of(mockMenuItems[0]));
     dialog.open.and.returnValue(mockDialogRef);
+  
     component.openEditMenuItemDialog(mockMenuItems[0]);
+  
+    // Verify that dialog.open was called with the correct arguments
     expect(dialog.open).toHaveBeenCalledWith(EditMenuItemDialogComponent, {
       width: '600px',
-      data: { ...mockMenuItems[0] }
+      data: { menuItem: { ...mockMenuItems[0] } } // Ensure the structure matches
     });
   });
 
@@ -75,13 +78,12 @@ describe('MenuEditingComponent', () => {
     const mockDialogRef = jasmine.createSpyObj('dialogRef', ['afterClosed']);
     mockDialogRef.afterClosed.and.returnValue(of(updatedMenuItem));
     dialog.open.and.returnValue(mockDialogRef);
-
-    // Set up the spy for updateMenuItem to return an observable of the updated item
+  
     menuService.updateMenuItem.and.returnValue(of(updatedMenuItem));
-
+  
     component.openEditMenuItemDialog(mockMenuItems[0]);
-    tick(); // Simulate the passage of time until dialog is closed
-
+    tick();
+  
     expect(menuService.updateMenuItem).toHaveBeenCalledWith(updatedMenuItem);
   }));
 
