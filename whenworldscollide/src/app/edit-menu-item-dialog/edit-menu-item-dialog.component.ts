@@ -1,3 +1,4 @@
+// In edit-menu-item-dialog.component.ts
 import { Component, Inject } from '@angular/core';
 import {
   MatDialogRef,
@@ -11,12 +12,12 @@ import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
-import { MenuItem } from '../menu.service';
+import { MenuItem, WorldPizzaTourItem } from '../menu.service';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
-  selector: 'app-edit-menu-item-dialog', // Component selector used in HTML
-  standalone: true, // Marks the component as standalone
-  // List of imported modules used by this component
+  selector: 'app-edit-menu-item-dialog',
+  standalone: true,
   imports: [
     MatFormFieldModule,
     FormsModule,
@@ -25,39 +26,46 @@ import { MenuItem } from '../menu.service';
     MatButtonModule,
     MatDialogTitle,
     MatInputModule,
-    CommonModule
+    CommonModule,
+    MatSelectModule
   ],
-  templateUrl: './edit-menu-item-dialog.component.html', // Path to the component's HTML template
-  styleUrl: './edit-menu-item-dialog.component.css', // Path to the component's CSS styles
+  templateUrl: './edit-menu-item-dialog.component.html',
+  styleUrl: './edit-menu-item-dialog.component.css',
 })
 export class EditMenuItemDialogComponent {
-  // Constructor with MatDialogRef and MAT_DIALOG_DATA injection
+  months: string[] = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
   constructor(
     public dialogRef: MatDialogRef<EditMenuItemDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { menuItem: MenuItem }
+    @Inject(MAT_DIALOG_DATA) public data: { menuItem: MenuItem | WorldPizzaTourItem, isWorldPizzaTourItem: boolean }
   ) {
     if (!this.data || !this.data.menuItem) {
       console.error('EditMenuItemDialogComponent: No data or menuItem provided.');
-      this.dialogRef.close(); // Close the dialog if data is invalid
+      this.dialogRef.close();
     }
   }
 
   ngOnInit(): void {
     if (!this.data || !this.data.menuItem) {
       console.error('EditMenuItemDialogComponent: No data or menuItem provided.');
-      this.dialogRef.close(); // Close the dialog if data is invalid
+      this.dialogRef.close();
     }
   }
 
-  // Method called when the "Cancel" button is clicked
   onNoClick(): void {
-    // Close the dialog without returning any data
     this.dialogRef.close();
   }
 
-  // Method called when the "Save" button is clicked
   onSave(): void {
-    // Close the dialog, returning the (potentially modified) menuItem data
-      this.dialogRef.close(this.data.menuItem);
+    // Pass along the isWorldPizzaTourItem flag
+    this.dialogRef.close({ menuItem: this.data.menuItem, isWorldPizzaTourItem: this.data.isWorldPizzaTourItem });
+  }
+
+  // Type guard function for WorldPizzaTourItem
+  isWorldPizzaTourItem(item: MenuItem | WorldPizzaTourItem): item is WorldPizzaTourItem {
+    return (item as WorldPizzaTourItem).month !== undefined;
   }
 }

@@ -4,7 +4,8 @@
   <div *ngFor="let item of menuItems" class="menu-item">
     <h3>{{ item.name }}</h3>
     <p>{{ item.description }}</p>
-    <p>Price: ${{ item.price }}</p>
+    <p *ngIf="!isWorldPizzaTourItem(item)">Price: ${{ item.price }}</p>
+    <p *ngIf="isWorldPizzaTourItem(item)">World Pizza Tour Item</p>
     <button (click)="addToOrder(item)">Add to Order</button>
   </div>
 </div>
@@ -13,7 +14,12 @@
   <h3>Your Order</h3>
   <div *ngIf="orderItems.length > 0">
     <div *ngFor="let orderItem of orderItems" class="order-item">
-      <p>{{ orderItem.menuItem.name }} ({{ orderItem.menuItem.price | currency }})</p>
+      <p>
+        {{ orderItem.menuItem.name }}
+        <span *ngIf="!isWorldPizzaTourItem(orderItem.menuItem)">
+          ({{ orderItem.menuItem.price | currency }})
+        </span>
+      </p>
       <input type="number" [(ngModel)]="orderItem.quantity" (change)="updateQuantity(orderItem, orderItem.quantity)" min="1">
       <button (click)="removeFromOrder(orderItem)">Remove</button>
     </div>

@@ -1,11 +1,10 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { OrderComponent } from './order.component';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { MenuService } from '../menu.service';
+import { MenuService, MenuItem, WorldPizzaTourItem } from '../menu.service';
 import { of, throwError } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { MenuItem } from '../menu.service'; // Assuming you have a MenuItem interface
 
 // Mock menu items
 const mockMenuItems: MenuItem[] = [
@@ -13,27 +12,35 @@ const mockMenuItems: MenuItem[] = [
   { id: 2, name: 'Test Salad', description: 'Another description', category: 'Salads', price: 8 }
 ];
 
-// Mock MenuService
-const mockMenuService = {
-  menuItems$: of(mockMenuItems),
-  loadMenuItems: () => of(mockMenuItems)
-};
+// Mock World Pizza Tour Items
+const mockWorldPizzaTourItems: WorldPizzaTourItem[] = [
+  { id: 3, menu_item_id: 3, name: 'Test World Pizza', description: 'Test world pizza description', month: 'July', category: 'World Pizza Tour', price: 10 },
+];
 
 describe('OrderComponent', () => {
   let component: OrderComponent;
   let fixture: ComponentFixture<OrderComponent>;
   let httpTestingController: HttpTestingController;
+  let menuService: jasmine.SpyObj<MenuService>;
 
   beforeEach(async () => {
+    menuService = jasmine.createSpyObj('MenuService', ['loadMenuItems', 'loadWorldPizzaTour', 'combinedMenuItems$']);
+
     await TestBed.configureTestingModule({
       imports: [OrderComponent, HttpClientTestingModule, FormsModule, CommonModule],
-      providers: [{ provide: MenuService, useValue: mockMenuService }]
+      providers: [{ provide: MenuService, useValue: menuService }]
     })
     .compileComponents();
 
     fixture = TestBed.createComponent(OrderComponent);
     component = fixture.componentInstance;
     httpTestingController = TestBed.inject(HttpTestingController);
+
+    // Mock combinedMenuItems$ to return both menu items and world pizza tour items
+    menuService.combinedMenuItems$ = of([...mockMenuItems, ...mockWorldPizzaTourItems]);
+    menuService.loadMenuItems.and.returnValue(of(mockMenuItems));
+    menuService.loadWorldPizzaTour.and.returnValue(of(mockWorldPizzaTourItems));
+
     fixture.detectChanges();
   });
 
@@ -46,8 +53,8 @@ describe('OrderComponent', () => {
   });
 
   it('should initialize menuItems from MenuService', () => {
-    expect(component.menuItems.length).toBe(2);
-    expect(component.menuItems).toEqual(mockMenuItems);
+    expect(component.menuItems.length).toBe(3);
+    expect(component.menuItems).toEqual([...mockMenuItems, ...mockWorldPizzaTourItems]);
   });
 
   it('should add an item to the order', () => {
@@ -93,18 +100,18 @@ describe('OrderComponent', () => {
   it('should submit an order successfully', fakeAsync(() => {
     const mockOrderResponse = { orderId: 123 };
     const customerName = 'Test User';
-  
+
     component.addToOrder(mockMenuItems[0]);
     component.customerName = customerName;
     component.submitOrder();
-  
+
     // This intercepts the POST request:
     const req = httpTestingController.expectOne('http://localhost:3000/api/orders');
     expect(req.request.method).toEqual('POST');
     req.flush(mockOrderResponse); // Simulate a successful response
-  
+
     tick(); // Advance the virtual clock
-  
+
     expect(component.confirmationMessage).toContain(customerName);
     expect(component.confirmationMessage).toContain(mockOrderResponse.orderId.toString());
     expect(component.orderItems.length).toBe(0);

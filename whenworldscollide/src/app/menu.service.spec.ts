@@ -1,6 +1,6 @@
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { MenuService, MenuItem } from './menu.service';
+import { MenuService, MenuItem, WorldPizzaTourItem } from './menu.service';
 import { of } from 'rxjs';
 
 describe('MenuService', () => {
@@ -22,11 +22,6 @@ describe('MenuService', () => {
 
   it('should be created', () => {
     expect(service).toBeTruthy();
-
-    // Expect and flush the request made in the constructor
-    const req = httpTestingController.expectOne('http://localhost:3000/api/menu');
-    expect(req.request.method).toEqual('GET');
-    req.flush([]); // Provide empty array for initial data
   });
 
   it('should fetch menu items on initialization', () => {

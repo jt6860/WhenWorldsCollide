@@ -85,6 +85,20 @@ appExpress.get('/api/orders', (req, res) => {
   });
 });
 
+// GET World Pizza Tour items for the current month
+appExpress.get('/api/world-pizza-tour', (req, res) => {
+  const currentMonth = new Date().toLocaleString('default', { month: 'long' });
+  const query = 'SELECT * FROM world_pizza_tour WHERE month = ?';
+
+  db.all(query, [currentMonth], (err, rows) => {
+    if (err) {
+      console.error('Error fetching World Pizza Tour items:', err);
+      return res.status(500).json({ error: err.message });
+    }
+    res.json(rows);
+  });
+});
+
 // POSTS
 // Contact Form Submission
 appExpress.post('/api/contact', (req, res) => {
@@ -260,6 +274,28 @@ appExpress.put('/api/menu/:id', (req, res) => {
       return res.status(500).json({ error: err.message });
     }
     res.json({ message: 'Menu item updated successfully.' });
+  });
+});
+
+appExpress.put('/api/world-pizza-tour/:id', (req, res) => {
+  const id = req.params.id;
+  const { menu_item_id, month, name, description } = req.body;
+
+  // Basic input validation
+  if (!month || !name || !description) {
+    return res.status(400).json({ error: 'Incomplete World Pizza Tour item data.' });
+  }
+
+  const query = 'UPDATE world_pizza_tour SET menu_item_id = ?, month = ?, name = ?, description = ? WHERE id = ?';
+  db.run(query, [menu_item_id, month, name, description, id], function (err) {
+    if (err) {
+      console.error('Error updating World Pizza Tour item:', err);
+      return res.status(500).json({ error: err.message });
+    }
+    if (this.changes === 0) {
+      return res.status(404).json({ error: `World Pizza Tour item with ID ${id} not found.` });
+    }
+    res.json({ message: 'World Pizza Tour item updated successfully.' });
   });
 });
 

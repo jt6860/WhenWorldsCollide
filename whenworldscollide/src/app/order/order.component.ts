@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-import { MenuService } from '../menu.service'; // Import MenuService to fetch menu items
+import { MenuService, WorldPizzaTourItem } from '../menu.service'; // Import MenuService and WorldPizzaTourItem
 import { Subscription } from 'rxjs';
 
 // Interface to define the structure of a MenuItem object
@@ -16,7 +16,7 @@ interface MenuItem {
 
 // Interface to define the structure of an OrderItem object
 interface OrderItem {
-  menuItem: MenuItem;
+  menuItem: MenuItem | WorldPizzaTourItem; // Now accepts both MenuItem and WorldPizzaTourItem
   quantity: number;
 }
 
@@ -37,7 +37,7 @@ export interface Order {
   styleUrls: ['./order.component.css'] // Path to the component's CSS styles
 })
 export class OrderComponent implements OnInit, OnDestroy {
-  menuItems: MenuItem[] = []; // Array to store the fetched menu items
+  menuItems: (MenuItem | WorldPizzaTourItem)[] = []; // Array to store the fetched menu items (now includes WorldPizzaTourItem)
   orderItems: OrderItem[] = []; // Array to store the items in the current order
   customerName: string = ''; // Customer's name for the order
   orderTotal: number = 0; // Total price of the order
@@ -49,8 +49,9 @@ export class OrderComponent implements OnInit, OnDestroy {
   constructor(private http: HttpClient, private menuService: MenuService) { }
 
   ngOnInit(): void {
-    // Subscribe to the menuItems$ observable from MenuService to get the menu items
-    this.menuItemsSubscription = this.menuService.menuItems$.subscribe(
+    this.menuService.loadWorldPizzaTour().subscribe();
+    // Subscribe to the combinedMenuItems$ observable from MenuService
+    this.menuItemsSubscription = this.menuService.combinedMenuItems$.subscribe(
       data => this.menuItems = data
     );
   }
@@ -61,7 +62,7 @@ export class OrderComponent implements OnInit, OnDestroy {
   }
 
   // Add an item to the order
-  addToOrder(menuItem: MenuItem): void {
+  addToOrder(menuItem: MenuItem | WorldPizzaTourItem): void {
     // Check if the item is already in the order
     const existingItem = this.orderItems.find(item => item.menuItem.id === menuItem.id);
     if (existingItem) {
@@ -74,6 +75,7 @@ export class OrderComponent implements OnInit, OnDestroy {
     // Recalculate the order total
     this.calculateOrderTotal();
   }
+
 
   // Remove an item from the order
   removeFromOrder(orderItem: OrderItem): void {
@@ -103,10 +105,12 @@ export class OrderComponent implements OnInit, OnDestroy {
   // Calculate the total price of the order
   calculateOrderTotal(): void {
     this.orderTotal = this.orderItems.reduce((total, item) => {
-      // Multiply each item's price by its quantity and add it to the total
-      return total + (item.menuItem.price * item.quantity);
+      // Check if the item has a price property before accessing it
+      const price = 'price' in item.menuItem ? item.menuItem.price : 0;
+      return total + (price * item.quantity);
     }, 0);
   }
+
 
   // Submit the order
   submitOrder(): void {
@@ -131,7 +135,8 @@ export class OrderComponent implements OnInit, OnDestroy {
       name: this.customerName,
       orderitems: JSON.stringify(this.orderItems.map(item => ({
         id: item.menuItem.id,
-        quantity: item.quantity
+        quantity: item.quantity,
+        // Include other necessary properties based on your database structure
       }))),
       totalprice: this.orderTotal
     };
@@ -153,5 +158,9 @@ export class OrderComponent implements OnInit, OnDestroy {
           this.errorMessage = 'There was an error submitting your order. Please try again later.';
         }
       });
+  }
+  // Type guard function for WorldPizzaTourItem
+  isWorldPizzaTourItem(item: MenuItem | WorldPizzaTourItem): item is WorldPizzaTourItem {
+    return (item as WorldPizzaTourItem).month !== undefined;
   }
 }
