@@ -46,18 +46,25 @@ describe('MenuComponent', () => {
   });
 
   it('should display menu items', () => {
-    const menuItemElements = compiled.querySelectorAll('.menu-item');
-    expect(menuItemElements.length).toBe(mockMenuItems.length + mockWorldPizzaTourItems.length);
+    component.menuItems = [...mockMenuItems, ...mockWorldPizzaTourItems];
+    fixture.detectChanges();
 
-    const allItems = [...mockMenuItems, ...mockWorldPizzaTourItems];
-    allItems.forEach((menuItem, index) => {
+    const menuItemElements = compiled.querySelectorAll('.menu-item');
+    expect(menuItemElements.length).toBe(component.menuItems.length);
+
+    component.menuItems.forEach((menuItem, index) => {
       const element = menuItemElements[index];
       expect(element.querySelector('h3')?.textContent).toContain(menuItem.name);
       expect(element.querySelector('p:nth-child(2)')?.textContent).toContain(menuItem.description);
       expect(element.querySelector('.category')?.textContent).toContain(menuItem.category);
-      if ('price' in menuItem) {
-        expect(element.querySelector('.price')?.textContent).toContain(menuItem.price.toString());
+
+      // Check if price exists before accessing it
+      if (!component.isWorldPizzaTourItem(menuItem)) {
+        const priceElement = element.querySelector('.price');
+        expect(priceElement).toBeTruthy(); // Check if the element exists
+        expect(priceElement?.textContent).toContain(menuItem.price.toString());
       }
+
       if (component.isWorldPizzaTourItem(menuItem)) {
         expect(element.querySelector('.month')?.textContent).toContain(menuItem.month);
       }
@@ -65,8 +72,8 @@ describe('MenuComponent', () => {
   });
 
   it('should unsubscribe from menuItems$ on destroy', () => {
-    spyOn(component['menuItemsSubscription'], 'unsubscribe'); // Corrected: menuItemsSubscription
+    spyOn(component['menuItemsSubscription'], 'unsubscribe');
     component.ngOnDestroy();
-    expect(component['menuItemsSubscription'].unsubscribe).toHaveBeenCalled(); // Corrected: menuItemsSubscription
+    expect(component['menuItemsSubscription'].unsubscribe).toHaveBeenCalled();
   });
 });

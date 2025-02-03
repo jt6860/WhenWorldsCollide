@@ -1,5 +1,5 @@
 import { Injectable, Optional, Inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, BehaviorSubject, throwError, combineLatest, forkJoin } from 'rxjs';
 import { catchError, tap, map } from 'rxjs/operators';
 
@@ -42,13 +42,14 @@ export class MenuService {
     @Optional() @Inject('mockMenuItems') initialMenuItems: MenuItem[] = []
   ) {
     // Initialize menuItemsSubject and menuItems$
-    this.menuItemsSubject = new BehaviorSubject<MenuItem[]>(initialMenuItems || []); // Default to an empty array
+    this.menuItemsSubject = new BehaviorSubject<MenuItem[]>(initialMenuItems || []);
     this.menuItems$ = this.menuItemsSubject.asObservable();
 
+    // Initialize worldPizzaTourSubject and worldPizzaTour$
     this.worldPizzaTourSubject = new BehaviorSubject<WorldPizzaTourItem[]>([]);
     this.worldPizzaTour$ = this.worldPizzaTourSubject.asObservable();
 
-    // Ensure combinedMenuItems$ is defined after menuItems$ and worldPizzaTour$
+    // Now initialize combinedMenuItems$ using the initialized observables
     this.combinedMenuItems$ = combineLatest([
       this.menuItems$,
       this.worldPizzaTour$
@@ -63,12 +64,6 @@ export class MenuService {
         ];
       })
     );
-
-    // Load data if no initial data is provided
-    if (!initialMenuItems || initialMenuItems.length === 0) {
-      this.loadMenuItems().subscribe();
-    }
-    this.loadWorldPizzaTour().subscribe();
   }
 
   // Fetch menu items
@@ -89,15 +84,19 @@ export class MenuService {
 
   // Update menu item
   updateMenuItem(menuItem: MenuItem): Observable<any> {
+    // Send a PUT request to the /menu/:id endpoint with the updated menu item data
     return this.http.put<any>(`${this.apiUrl}/${menuItem.id}`, menuItem).pipe(
+      // Use tap operator to update the menuItemsSubject with the updated item
       tap(() => {
-        const updatedMenuItems = this.menuItemsSubject.value.map(item =>
+        const updatedMenuItems = this.menuItemsSubject.value.map((item) =>
           item.id === menuItem.id ? menuItem : item
         );
         this.menuItemsSubject.next(updatedMenuItems);
       }),
+      // Use catchError operator to handle errors during the API call
       catchError((error) => {
         console.error('Error updating menu item:', error);
+        // Throw a user-friendly error message
         return throwError(() => new Error('An error occurred. Please try again later.'));
       })
     );
@@ -113,15 +112,17 @@ export class MenuService {
     const currentMonthUrl = `${this.worldPizzaTourApiUrl}?month=${currentMonth}`;
     const nextMonthUrl = `${this.worldPizzaTourApiUrl}?month=${nextMonth}`;
 
+    // Use forkJoin to make requests in parallel and wait for both to complete
     return forkJoin({
       currentMonthItems: this.http.get<WorldPizzaTourItem[]>(currentMonthUrl),
       nextMonthItems: this.http.get<WorldPizzaTourItem[]>(nextMonthUrl)
     }).pipe(
       map(results => {
+        // Combine the results, filter out duplicates
         const combinedItems = [...results.currentMonthItems, ...results.nextMonthItems];
         return combinedItems.filter((item, index, self) =>
-          index === self.findIndex(t => (
             t.month === item.month && t.name === item.name
+          index === self.findIndex((t) => (
           ))
         );
       }),

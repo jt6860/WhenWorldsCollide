@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { MenuEditingComponent } from './menu-editing.component';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MenuService, MenuItem } from '../menu.service';
+import { MenuService, MenuItem, WorldPizzaTourItem } from '../menu.service';
 import { of, throwError } from 'rxjs';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { EditMenuItemDialogComponent } from '../edit-menu-item-dialog/edit-menu-item-dialog.component';
@@ -13,15 +13,24 @@ const mockMenuItems: MenuItem[] = [
   { id: 2, name: 'Test Salad', description: 'Another description', category: 'Salads', price: 8 }
 ];
 
+const mockWorldPizzaTourItems: WorldPizzaTourItem[] = [
+  { id: 3, menu_item_id: 3, name: 'Test World Pizza', description: 'Test world pizza description', month: 'July', category: 'World Pizza Tour', price: 10 },
+];
+
 describe('MenuEditingComponent', () => {
   let component: MenuEditingComponent;
   let fixture: ComponentFixture<MenuEditingComponent>;
   let menuService: jasmine.SpyObj<MenuService>;
   let dialog: jasmine.SpyObj<MatDialog>;
-  let httpTestingController: HttpTestingController;
 
   beforeEach(async () => {
-    const menuServiceSpy = jasmine.createSpyObj('MenuService', ['updateMenuItem', 'loadMenuItems', 'menuItems$']);
+    const menuServiceSpy = jasmine.createSpyObj('MenuService', [
+      'updateMenuItem', 
+      'loadMenuItems', 
+      'loadWorldPizzaTour', 
+      'combinedMenuItems$', 
+      'updateWorldPizzaTourItem'
+    ]);
     const dialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
 
     await TestBed.configureTestingModule({
@@ -37,17 +46,15 @@ describe('MenuEditingComponent', () => {
     component = fixture.componentInstance;
     menuService = TestBed.inject(MenuService) as jasmine.SpyObj<MenuService>;
     dialog = TestBed.inject(MatDialog) as jasmine.SpyObj<MatDialog>;
-    httpTestingController = TestBed.inject(HttpTestingController);
 
-    menuService.menuItems$ = of(mockMenuItems);
+    // Mock combinedMenuItems$ to return both menu items and world pizza tour items
+    menuService.combinedMenuItems$ = of([...mockMenuItems, ...mockWorldPizzaTourItems]);
     menuService.loadMenuItems.and.returnValue(of(mockMenuItems));
+    menuService.loadWorldPizzaTour.and.returnValue(of(mockWorldPizzaTourItems));
     menuService.updateMenuItem.and.returnValue(of({}));
+    menuService.updateWorldPizzaTourItem.and.returnValue(of({}));
 
     fixture.detectChanges();
-  });
-
-  afterEach(() => {
-    httpTestingController.verify();
   });
 
   it('should create', () => {
@@ -55,8 +62,8 @@ describe('MenuEditingComponent', () => {
   });
 
   it('should initialize menu items on ngOnInit', () => {
-    expect(component.menuItems.length).toBe(2);
-    expect(component.menuItems).toEqual(mockMenuItems);
+    expect(component.menuItems.length).toBe(3);
+    expect(component.menuItems).toEqual([...mockMenuItems, ...mockWorldPizzaTourItems]);
   });
 
   it('should open dialog with menu item data when openEditMenuItemDialog is called', () => {
@@ -66,17 +73,16 @@ describe('MenuEditingComponent', () => {
   
     component.openEditMenuItemDialog(mockMenuItems[0]);
   
-    // Verify that dialog.open was called with the correct arguments
     expect(dialog.open).toHaveBeenCalledWith(EditMenuItemDialogComponent, {
       width: '600px',
-      data: { menuItem: { ...mockMenuItems[0] } } // Ensure the structure matches
+      data: { menuItem: { ...mockMenuItems[0] }, isWorldPizzaTourItem: false }
     });
   });
 
   it('should update menu item on dialog close with result', fakeAsync(() => {
     const updatedMenuItem: MenuItem = { ...mockMenuItems[0], name: 'Updated Pizza' };
     const mockDialogRef = jasmine.createSpyObj('dialogRef', ['afterClosed']);
-    mockDialogRef.afterClosed.and.returnValue(of(updatedMenuItem));
+    mockDialogRef.afterClosed.and.returnValue(of({ menuItem: updatedMenuItem, isWorldPizzaTourItem: false }));
     dialog.open.and.returnValue(mockDialogRef);
   
     menuService.updateMenuItem.and.returnValue(of(updatedMenuItem));
@@ -112,9 +118,10 @@ describe('MenuEditingComponent', () => {
   it('should display menu items', () => {
     fixture.detectChanges(); // Ensure component is updated
     const itemElements = fixture.debugElement.queryAll(By.css('.menu-item'));
-    expect(itemElements.length).toBe(mockMenuItems.length);
+    expect(itemElements.length).toBe(mockMenuItems.length + mockWorldPizzaTourItems.length);
 
-    mockMenuItems.forEach((item, index) => {
+    const allItems = [...mockMenuItems, ...mockWorldPizzaTourItems];
+    allItems.forEach((item, index) => {
       const itemElement = itemElements[index];
       expect(itemElement.query(By.css('h3')).nativeElement.textContent).toContain(item.name);
     });
