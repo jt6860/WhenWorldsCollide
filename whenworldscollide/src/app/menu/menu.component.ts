@@ -17,6 +17,8 @@ export class MenuComponent implements OnInit, OnDestroy {
   constructor(private menuService: MenuService) { }
 
   ngOnInit() {
+    // Load data when component initializes
+    this.menuService.loadMenuItems().subscribe();
     this.menuService.loadWorldPizzaTour().subscribe();
     this.menuItemsSubscription = this.menuService.combinedMenuItems$.subscribe(
       (data) => {
