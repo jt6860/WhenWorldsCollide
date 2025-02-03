@@ -87,14 +87,21 @@ appExpress.get('/api/orders', (req, res) => {
 
 // GET World Pizza Tour items for the current month
 appExpress.get('/api/world-pizza-tour', (req, res) => {
-  const currentMonth = new Date().toLocaleString('default', { month: 'long' });
-  const query = 'SELECT * FROM world_pizza_tour WHERE month = ?';
+  const month = req.query.month;
+  const query = `
+    SELECT wpt.*, mi.price
+    FROM world_pizza_tour wpt
+    JOIN menuitems mi ON wpt.menu_item_id = mi.id
+    WHERE wpt.month = ?
+  `;
 
-  db.all(query, [currentMonth], (err, rows) => {
+  db.all(query, [month], (err, rows) => {
     if (err) {
       console.error('Error fetching World Pizza Tour items:', err);
       return res.status(500).json({ error: err.message });
     }
+    // Log the rows to verify the data
+    console.log('World Pizza Tour Items from DB:', rows);
     res.json(rows);
   });
 });

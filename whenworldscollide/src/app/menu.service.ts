@@ -121,8 +121,8 @@ export class MenuService {
         // Combine the results, filter out duplicates
         const combinedItems = [...results.currentMonthItems, ...results.nextMonthItems];
         return combinedItems.filter((item, index, self) =>
-            t.month === item.month && t.name === item.name
           index === self.findIndex((t) => (
+            t.month === item.month && t.name === item.name
           ))
         );
       }),

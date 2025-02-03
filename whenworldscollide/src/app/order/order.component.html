@@ -15,10 +15,7 @@
   <div *ngIf="orderItems.length > 0">
     <div *ngFor="let orderItem of orderItems" class="order-item">
       <p>
-        {{ orderItem.menuItem.name }}
-        <span *ngIf="!isWorldPizzaTourItem(orderItem.menuItem)">
-          ({{ orderItem.menuItem.price | currency }})
-        </span>
+        {{ orderItem.menuItem.name }} ({{ orderItem.menuItem.price | currency }})
       </p>
       <input type="number" [(ngModel)]="orderItem.quantity" (change)="updateQuantity(orderItem, orderItem.quantity)" min="1">
       <button (click)="removeFromOrder(orderItem)">Remove</button>
