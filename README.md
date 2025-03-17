@@ -37,7 +37,7 @@
 
 **When Worlds Collide** is a desktop application for a hypothetical pizza restaurant. It's built using Angular for the frontend, Express for the backend, SQLite for the database, and packaged with Electron for a cross-platform desktop experience. The application allows users to browse the menu, place orders, and contact the restaurant. It also provides an admin interface for managing the menu and viewing orders and contact submissions.
 
-This project was developed as a Group Capstone Project for CS492 by John Torres, Rachael Marshall, Deninson Munoz, and Joseph Collins.
+This project was developed as a Capstone Project for CS492.
 
 ---
 
